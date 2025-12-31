@@ -663,9 +663,14 @@ img {
     text-align: center;
     position: relative;
     overflow: hidden;
+    /* Force GPU layer to fix rendering artifacts */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
 }
 
-/* Premium diagonal pattern overlay */
+/* Noise texture overlay to mask rendering artifacts */
 .cta::before {
     content: '';
     position: absolute;
@@ -673,17 +678,8 @@ img {
     left: 0;
     right: 0;
     bottom: 0;
-    background:
-        repeating-linear-gradient(45deg,
-            transparent,
-            transparent 40px,
-            rgba(255, 255, 255, 0.02) 40px,
-            rgba(255, 255, 255, 0.02) 41px),
-        repeating-linear-gradient(-45deg,
-            transparent,
-            transparent 40px,
-            rgba(255, 255, 255, 0.02) 40px,
-            rgba(255, 255, 255, 0.02) 41px);
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    opacity: 0.02;
     pointer-events: none;
     z-index: 0;
 }
@@ -749,9 +745,14 @@ img {
     padding: var(--sp-16) 0 var(--sp-8);
     position: relative;
     overflow: hidden;
+    /* Force GPU layer to fix rendering artifacts */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
 }
 
-/* Premium diagonal pattern overlay */
+/* Noise texture overlay to mask rendering artifacts */
 .footer::before {
     content: '';
     position: absolute;
@@ -759,17 +760,8 @@ img {
     left: 0;
     right: 0;
     bottom: 0;
-    background:
-        repeating-linear-gradient(45deg,
-            transparent,
-            transparent 40px,
-            rgba(255, 255, 255, 0.015) 40px,
-            rgba(255, 255, 255, 0.015) 41px),
-        repeating-linear-gradient(-45deg,
-            transparent,
-            transparent 40px,
-            rgba(255, 255, 255, 0.015) 40px,
-            rgba(255, 255, 255, 0.015) 41px);
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    opacity: 0.02;
     pointer-events: none;
     z-index: 0;
 }
