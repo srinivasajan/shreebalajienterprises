@@ -895,24 +895,22 @@
         let tagValues = [];
 
         // ── AUTH ──
-        async function doLogin() {
+        // Password stored here for simple client-side check
+        // (Change ADMIN_PW to update the password)
+        const ADMIN_PW = 'shreebalaji@2025';
+
+        function doLogin() {
             const pw = document.getElementById('pwInput').value.trim();
             const err = document.getElementById('loginErr');
             err.textContent = '';
-            if (!pw) return;
-            try {
-                const { data, error } = await sb.from('admin_config').select('admin_password').eq('id', 1).single();
-                if (error) throw error;
-                if (data.admin_password === pw) {
-                    sessionStorage.setItem('sba_auth', '1');
-                    document.getElementById('loginScreen').style.display = 'none';
-                    document.getElementById('adminApp').style.display = 'block';
-                    loadProperties();
-                } else {
-                    err.textContent = 'Incorrect password.';
-                }
-            } catch (e) {
-                err.textContent = 'Connection error. Try again.';
+            if (!pw) { err.textContent = 'Please enter password.'; return; }
+            if (pw === ADMIN_PW) {
+                sessionStorage.setItem('sba_auth', '1');
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('adminApp').style.display = 'block';
+                loadProperties();
+            } else {
+                err.textContent = 'Incorrect password. Try: shreebalaji@2025';
             }
         }
 
