@@ -267,3 +267,49 @@ ${message}`;
         });
     }
 });
+
+// ========================================
+// Image Slider for Property Cards
+// ========================================
+(function () {
+    const sliderState = {};
+
+    function getSlider(id) {
+        if (!sliderState[id]) {
+            const container = document.getElementById(id);
+            if (!container) return null;
+            const slides = container.querySelectorAll('.slide');
+            const dots = document.querySelectorAll('#' + id + '-dots .dot');
+            sliderState[id] = { container, slides, dots, current: 0 };
+        }
+        return sliderState[id];
+    }
+
+    window.changeSlide = function (id, direction) {
+        const s = getSlider(id);
+        if (!s) return;
+        const next = (s.current + direction + s.slides.length) % s.slides.length;
+        window.goToSlide(id, next);
+    };
+
+    window.goToSlide = function (id, index) {
+        const s = getSlider(id);
+        if (!s) return;
+        s.slides[s.current].classList.remove('active');
+        if (s.dots[s.current]) s.dots[s.current].classList.remove('active');
+        s.current = index;
+        s.slides[s.current].classList.add('active');
+        if (s.dots[s.current]) s.dots[s.current].classList.add('active');
+    };
+
+    // Auto-advance sliders every 4 seconds
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.property-card__image--slider').forEach(function (el) {
+            const id = el.id;
+            if (!id) return;
+            setInterval(function () {
+                window.changeSlide(id, 1);
+            }, 4000);
+        });
+    });
+})();
