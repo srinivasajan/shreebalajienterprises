@@ -313,3 +313,174 @@ ${message}`;
         });
     });
 })();
+
+// ========================================
+// Spring Physics UI — jelly / soft-body feel
+// ========================================
+(function () {
+    'use strict';
+
+    /* ---- spring helpers ---- */
+    function makeSpring(stiffness, damping) {
+        return { stiffness: stiffness, damping: damping, value: 0, velocity: 0, target: 0 };
+    }
+
+    function tickSpring(s, dt) {
+        var force = -s.stiffness * (s.value - s.target) - s.damping * s.velocity;
+        s.velocity += force * dt;
+        s.value += s.velocity * dt;
+        return Math.abs(s.velocity) > 0.0003 || Math.abs(s.value - s.target) > 0.0003;
+    }
+
+    /* ---- animation loop ---- */
+    var active = new Set();
+    var lastTime = null;
+
+    function loop(time) {
+        var dt = lastTime ? Math.min((time - lastTime) / 1000, 0.05) : 0.016;
+        lastTime = time;
+
+        active.forEach(function (item) {
+            var alive = false;
+            var keys = Object.keys(item.springs);
+            for (var i = 0; i < keys.length; i++) {
+                if (tickSpring(item.springs[keys[i]], dt)) alive = true;
+            }
+            item.apply();
+            if (!alive) active.delete(item);
+        });
+
+        requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
+
+    function wake(item) { active.add(item); }
+
+    /* ---- Buttons & filter pills ---- */
+    document.querySelectorAll('.btn, .nav__cta, .filter-btn').forEach(function (el) {
+        // don't fight CSS transitions on these elements
+        el.style.transitionProperty = 'background, color, border-color, box-shadow';
+
+        var sp = {
+            scale: makeSpring(230, 14),
+            skewX: makeSpring(160, 11)
+        };
+        var item = {
+            springs: sp,
+            apply: function () {
+                el.style.transform =
+                    'scale(' + (1 + sp.scale.value) + ') skewX(' + sp.skewX.value + 'deg)';
+            }
+        };
+
+        el.addEventListener('mouseenter', function () {
+            sp.scale.velocity -= 0.08;
+            sp.skewX.velocity += 2.5;
+            wake(item);
+        });
+        el.addEventListener('mouseleave', function () {
+            sp.skewX.target = 0;
+            sp.scale.target = 0;
+            wake(item);
+        });
+        el.addEventListener('mousedown', function () {
+            sp.scale.velocity -= 0.12;
+            wake(item);
+        });
+        el.addEventListener('mouseup', function () {
+            sp.scale.velocity += 0.08;
+            wake(item);
+        });
+    });
+
+    /* ---- WhatsApp float button ---- */
+    var waBtn = document.querySelector('.whatsapp');
+    if (waBtn) {
+        var waSp = {
+            scale: makeSpring(200, 12),
+            rot: makeSpring(150, 10)
+        };
+        var waItem = {
+            springs: waSp,
+            apply: function () {
+                waBtn.style.transform =
+                    'scale(' + (1 + waSp.scale.value) + ') rotate(' + waSp.rot.value + 'deg)';
+            }
+        };
+        waBtn.addEventListener('mouseenter', function () {
+            waSp.scale.velocity -= 0.12;
+            waSp.rot.velocity += 10;
+            wake(waItem);
+        });
+        waBtn.addEventListener('mouseleave', function () {
+            waSp.scale.target = 0;
+            waSp.rot.target = 0;
+            wake(waItem);
+        });
+    }
+
+    /* ---- Property cards, service cards, type & feature tiles ---- */
+    document.querySelectorAll('.property-card, .service, .type, .feature').forEach(function (el) {
+        el.style.willChange = 'transform';
+        el.style.transitionProperty = 'box-shadow, opacity';   // don't fight transform
+
+        var sp = {
+            rotX: makeSpring(130, 11),
+            rotY: makeSpring(130, 11),
+            scale: makeSpring(200, 14)
+        };
+        var item = {
+            springs: sp,
+            apply: function () {
+                el.style.transform =
+                    'perspective(900px)' +
+                    ' rotateX(' + sp.rotX.value + 'deg)' +
+                    ' rotateY(' + sp.rotY.value + 'deg)' +
+                    ' scale(' + (1 + sp.scale.value) + ')';
+            }
+        };
+
+        el.addEventListener('mouseenter', function () {
+            sp.scale.target = 0.03;
+            wake(item);
+        });
+        el.addEventListener('mousemove', function (e) {
+            var r = el.getBoundingClientRect();
+            var dx = (e.clientX - (r.left + r.width / 2)) / (r.width / 2);
+            var dy = (e.clientY - (r.top + r.height / 2)) / (r.height / 2);
+            sp.rotY.target = dx * 7;
+            sp.rotX.target = -dy * 5;
+            wake(item);
+        });
+        el.addEventListener('mouseleave', function () {
+            sp.rotX.target = 0;
+            sp.rotY.target = 0;
+            sp.scale.target = 0;
+            wake(item);
+        });
+        el.addEventListener('mousedown', function () {
+            sp.scale.velocity -= 0.06;
+            wake(item);
+        });
+        el.addEventListener('mouseup', function () {
+            sp.scale.velocity += 0.04;
+            wake(item);
+        });
+    });
+
+    /* ---- Nav links — subtle bounce up ---- */
+    document.querySelectorAll('.nav__link').forEach(function (el) {
+        el.style.display = 'inline-block'; // needed for transform
+        el.style.transitionProperty = 'color';
+
+        var sp = { y: makeSpring(300, 16) };
+        var item = {
+            springs: sp,
+            apply: function () { el.style.transform = 'translateY(' + sp.y.value + 'px)'; }
+        };
+        el.addEventListener('mouseenter', function () { sp.y.velocity -= 4; wake(item); });
+        el.addEventListener('mouseleave', function () { sp.y.target = 0; wake(item); });
+    });
+
+})();
+
