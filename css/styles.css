@@ -1158,6 +1158,18 @@ img {
     .property-card--featured .property-card__content {
         border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
     }
+
+    .property-card--featured-reverse {
+        grid-template-columns: 1fr 1.4fr;
+    }
+
+    .property-card--featured-reverse .property-card__content {
+        border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+    }
+
+    .property-card--featured-reverse .property-card__image {
+        border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+    }
 }
 
 .property-card__image--slider {
