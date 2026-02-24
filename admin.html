@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin — Shree Balaji Enterprises</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --bg: #0f1117;
+            --surface: #1a1d27;
+            --surface2: #22263a;
+            --border: #2e3250;
+            --accent: #4f7cff;
+            --accent-h: #6b93ff;
+            --danger: #ff5c5c;
+            --success: #34d399;
+            --warning: #fbbf24;
+            --text: #e8eaf6;
+            --muted: #8b92b8;
+            --radius: 12px;
+            --shadow: 0 4px 24px rgba(0, 0, 0, .4);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh
+        }
+
+        /* ── LOGIN ── */
+        #loginScreen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 24px
+        }
+
+        .login-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 48px 40px;
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+            box-shadow: var(--shadow)
+        }
+
+        .login-card .logo {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 6px
+        }
+
+        .login-card .sub {
+            color: var(--muted);
+            font-size: .9rem;
+            margin-bottom: 32px
+        }
+
+        .login-card input {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 1rem;
+            outline: none;
+            transition: .2s
+        }
+
+        .login-card input:focus {
+            border-color: var(--accent)
+        }
+
+        .login-card .btn-login {
+            width: 100%;
+            margin-top: 16px;
+            padding: 14px;
+            background: var(--accent);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: .2s
+        }
+
+        .login-card .btn-login:hover {
+            background: var(--accent-h)
+        }
+
+        .login-err {
+            color: var(--danger);
+            font-size: .85rem;
+            margin-top: 12px;
+            min-height: 20px
+        }
+
+        /* ── LAYOUT ── */
+        #adminApp {
+            display: none
+        }
+
+        .topbar {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 60px;
+            position: sticky;
+            top: 0;
+            z-index: 100
+        }
+
+        .topbar-brand {
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: var(--accent)
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px
+        }
+
+        .badge-count {
+            background: var(--accent);
+            color: #fff;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: .78rem;
+            font-weight: 600
+        }
+
+        .btn-logout {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            padding: 7px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: .85rem;
+            transition: .2s
+        }
+
+        .btn-logout:hover {
+            border-color: var(--danger);
+            color: var(--danger)
+        }
+
+        .main {
+            padding: 28px;
+            max-width: 1200px;
+            margin: 0 auto
+        }
+
+        /* ── TOP ACTIONS ── */
+        .actions-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 12px
+        }
+
+        .actions-row h1 {
+            font-size: 1.4rem;
+            font-weight: 700
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 9px;
+            border: none;
+            font-size: .9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: .2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #fff
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-h)
+        }
+
+        .btn-danger {
+            background: transparent;
+            border: 1px solid var(--danger);
+            color: var(--danger)
+        }
+
+        .btn-danger:hover {
+            background: var(--danger);
+            color: #fff
+        }
+
+        .btn-ghost {
+            background: var(--surface2);
+            color: var(--text);
+            border: 1px solid var(--border)
+        }
+
+        .btn-ghost:hover {
+            border-color: var(--accent);
+            color: var(--accent)
+        }
+
+        .btn-sm {
+            padding: 6px 14px;
+            font-size: .8rem
+        }
+
+        /* ── FILTERS ── */
+        .filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px
+        }
+
+        .filter-btn {
+            padding: 7px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: .82rem;
+            transition: .2s
+        }
+
+        .filter-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff
+        }
+
+        /* ── TABLE ── */
+        .table-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse
+        }
+
+        th {
+            padding: 13px 16px;
+            text-align: left;
+            font-size: .78rem;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            border-bottom: 1px solid var(--border)
+        }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+            font-size: .88rem;
+            vertical-align: middle
+        }
+
+        tr:last-child td {
+            border-bottom: none
+        }
+
+        tr:hover td {
+            background: var(--surface2)
+        }
+
+        .prop-thumb {
+            width: 56px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 6px;
+            background: var(--surface2)
+        }
+
+        .prop-thumb-placeholder {
+            width: 56px;
+            height: 40px;
+            background: var(--surface2);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--muted);
+            font-size: 1.1rem
+        }
+
+        .badge {
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: .75rem;
+            font-weight: 600;
+            display: inline-block
+        }
+
+        .badge-res {
+            background: rgba(79, 124, 255, .15);
+            color: var(--accent)
+        }
+
+        .badge-com {
+            background: rgba(251, 191, 36, .15);
+            color: var(--warning)
+        }
+
+        .status-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer
+        }
+
+        .toggle {
+            position: relative;
+            width: 38px;
+            height: 20px
+        }
+
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0
+        }
+
+        .toggle-track {
+            position: absolute;
+            inset: 0;
+            background: var(--border);
+            border-radius: 20px;
+            transition: .2s
+        }
+
+        .toggle input:checked+.toggle-track {
+            background: var(--success)
+        }
+
+        .toggle-thumb {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 14px;
+            height: 14px;
+            background: #fff;
+            border-radius: 50%;
+            transition: .2s
+        }
+
+        .toggle input:checked~.toggle-thumb {
+            transform: translateX(18px)
+        }
+
+        .row-actions {
+            display: flex;
+            gap: 8px
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--muted)
+        }
+
+        .empty-state svg {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 16px;
+            display: block;
+            opacity: .4
+        }
+
+        /* ── MODAL ── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .7);
+            z-index: 200;
+            display: none;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 24px;
+            overflow-y: auto
+        }
+
+        .modal-overlay.open {
+            display: flex
+        }
+
+        .modal {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 680px;
+            padding: 32px;
+            box-shadow: var(--shadow);
+            margin: auto
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px
+        }
+
+        .modal-header h2 {
+            font-size: 1.2rem;
+            font-weight: 700
+        }
+
+        .btn-close {
+            background: transparent;
+            border: none;
+            color: var(--muted);
+            font-size: 1.4rem;
+            cursor: pointer;
+            line-height: 1;
+            padding: 4px
+        }
+
+        .btn-close:hover {
+            color: var(--text)
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 7px
+        }
+
+        .form-group.full {
+            grid-column: 1/-1
+        }
+
+        .form-group label {
+            font-size: .82rem;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .04em
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 11px 14px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            color: var(--text);
+            font-size: .9rem;
+            font-family: inherit;
+            outline: none;
+            transition: .2s;
+            width: 100%
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--accent)
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px
+        }
+
+        .form-group select option {
+            background: var(--surface2)
+        }
+
+        .img-preview-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 8px
+        }
+
+        .img-preview-item {
+            position: relative
+        }
+
+        .img-preview-item img {
+            width: 80px;
+            height: 56px;
+            object-fit: cover;
+            border-radius: 7px;
+            border: 1px solid var(--border)
+        }
+
+        .img-delete {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: var(--danger);
+            color: #fff;
+            border: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            font-size: .65rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border)
+        }
+
+        .help-text {
+            font-size: .77rem;
+            color: var(--muted);
+            margin-top: 4px
+        }
+
+        .fetch-btn {
+            padding: 9px 14px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            color: var(--text);
+            font-size: .85rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: .2s
+        }
+
+        .fetch-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent)
+        }
+
+        .input-with-btn {
+            display: flex;
+            gap: 8px
+        }
+
+        .input-with-btn input {
+            flex: 1
+        }
+
+        .ik-status {
+            font-size: .78rem;
+            margin-top: 6px;
+            min-height: 16px
+        }
+
+        .ik-status.ok {
+            color: var(--success)
+        }
+
+        .ik-status.err {
+            color: var(--danger)
+        }
+
+        .tag-input-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 8px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            min-height: 42px;
+            align-items: center;
+            cursor: text
+        }
+
+        .tag-input-area:focus-within {
+            border-color: var(--accent)
+        }
+
+        .tag {
+            background: rgba(79, 124, 255, .2);
+            color: var(--accent);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: .8rem;
+            display: flex;
+            align-items: center;
+            gap: 5px
+        }
+
+        .tag-remove {
+            cursor: pointer;
+            font-size: .7rem;
+            line-height: 1
+        }
+
+        .tag-input {
+            border: none;
+            background: transparent;
+            color: var(--text);
+            font-size: .85rem;
+            font-family: inherit;
+            outline: none;
+            padding: 2px 4px;
+            min-width: 80px;
+            flex: 1
+        }
+
+        /* ── Toast ── */
+        #toast {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 20px;
+            font-size: .9rem;
+            font-weight: 500;
+            opacity: 0;
+            transition: opacity .3s;
+            z-index: 999;
+            pointer-events: none;
+            max-width: 300px
+        }
+
+        #toast.show {
+            opacity: 1
+        }
+
+        #toast.success {
+            border-color: var(--success);
+            color: var(--success)
+        }
+
+        #toast.error {
+            border-color: var(--danger);
+            color: var(--danger)
+        }
+
+        /* ── Loader ── */
+        .loader {
+            display: flex;
+            gap: 6px;
+            padding: 40px;
+            justify-content: center
+        }
+
+        .loader span {
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: bounce .8s infinite alternate
+        }
+
+        .loader span:nth-child(2) {
+            animation-delay: .15s
+        }
+
+        .loader span:nth-child(3) {
+            animation-delay: .3s
+        }
+
+        @keyframes bounce {
+            from {
+                transform: translateY(0)
+            }
+
+            to {
+                transform: translateY(-10px)
+            }
+        }
+
+        @media(max-width:600px) {
+            .form-grid {
+                grid-template-columns: 1fr
+            }
+
+            .main {
+                padding: 16px
+            }
+
+            .modal {
+                padding: 20px
+            }
+
+            table th:nth-child(3),
+            table td:nth-child(3) {
+                display: none
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- LOGIN -->
+    <div id="loginScreen">
+        <div class="login-card">
+            <div class="logo">🏠 Shree Balaji</div>
+            <div class="sub">Admin Portal</div>
+            <input type="password" id="pwInput" placeholder="Enter admin password"
+                onkeydown="if(event.key==='Enter')doLogin()">
+            <button class="btn-login" onclick="doLogin()">Sign In</button>
+            <div class="login-err" id="loginErr"></div>
+        </div>
+    </div>
+
+    <!-- APP -->
+    <div id="adminApp">
+        <div class="topbar">
+            <div class="topbar-brand">🏠 Shree Balaji — Admin</div>
+            <div class="topbar-right">
+                <span class="badge-count" id="propCount">0 Properties</span>
+                <button class="btn-logout" onclick="doLogout()">Sign Out</button>
+            </div>
+        </div>
+        <div class="main">
+            <div class="actions-row">
+                <h1>Property Listings</h1>
+                <button class="btn btn-primary" onclick="openModal()">＋ Add Property</button>
+            </div>
+            <div class="filters">
+                <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+                <button class="filter-btn" onclick="setFilter('residential',this)">Residential</button>
+                <button class="filter-btn" onclick="setFilter('commercial',this)">Commercial</button>
+                <button class="filter-btn" onclick="setFilter('active',this)">Active</button>
+                <button class="filter-btn" onclick="setFilter('inactive',this)">Hidden</button>
+            </div>
+            <div class="table-wrap">
+                <div class="loader" id="loader"><span></span><span></span><span></span></div>
+                <table id="propTable" style="display:none">
+                    <thead>
+                        <tr>
+                            <th>Photo</th>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Location</th>
+                            <th>Images</th>
+                            <th>Visible</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="propBody"></tbody>
+                </table>
+                <div class="empty-state" id="emptyState" style="display:none">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                        <polyline points="9 22 9 12 15 12 15 22" />
+                    </svg>
+                    <p>No properties found</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Add / Edit -->
+    <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add Property</h2>
+                <button class="btn-close" onclick="closeModal()">×</button>
+            </div>
+            <div class="form-grid">
+                <div class="form-group full">
+                    <label>Property Name</label>
+                    <input type="text" id="fName" placeholder="e.g. Godrej Greenview Estate">
+                </div>
+                <div class="form-group">
+                    <label>Type</label>
+                    <select id="fType">
+                        <option value="residential">Residential</option>
+                        <option value="commercial">Commercial</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Badge</label>
+                    <select id="fBadge">
+                        <option value="For Sale">For Sale</option>
+                        <option value="For Rent">For Rent</option>
+                        <option value="Sold">Sold</option>
+                    </select>
+                </div>
+                <div class="form-group full">
+                    <label>Location</label>
+                    <input type="text" id="fLocation" placeholder="e.g. Ambernath">
+                </div>
+                <div class="form-group full">
+                    <label>Features (press Enter to add)</label>
+                    <div class="tag-input-area" onclick="document.getElementById('tagInput').focus()">
+                        <div id="tagList"></div>
+                        <input class="tag-input" id="tagInput" placeholder="Type and press Enter..."
+                            onkeydown="handleTagKey(event)">
+                    </div>
+                </div>
+                <div class="form-group full">
+                    <label>WhatsApp Number</label>
+                    <input type="text" id="fWA" placeholder="917767805544" value="917767805544">
+                </div>
+                <div class="form-group full">
+                    <label>ImageKit Folder Path (auto-loads images)</label>
+                    <div class="input-with-btn">
+                        <input type="text" id="fIKFolder" placeholder="e.g. new/godrej varanya  OR  Ishwar Subhalaxmi">
+                        <button class="fetch-btn" onclick="fetchIKImages()">Fetch Images</button>
+                    </div>
+                    <div class="help-text">Type the exact ImageKit folder path and click "Fetch Images" to auto-load all
+                        photos.</div>
+                    <div class="ik-status" id="ikStatus"></div>
+                </div>
+                <div class="form-group full">
+                    <label>Or Paste Image URLs (one per line)</label>
+                    <textarea id="fImgUrls" placeholder="https://ik.imagekit.io/shreebalaji/..." rows="4"></textarea>
+                    <div class="help-text">These will be combined with fetched images above.</div>
+                </div>
+                <div class="form-group full">
+                    <label>Image Preview</label>
+                    <div class="img-preview-row" id="imgPreviewRow">
+                        <div style="color:var(--muted);font-size:.82rem;padding:4px 0">No images yet</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <label
+                    style="display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--muted);font-size:.88rem;margin-right:auto">
+                    <input type="checkbox" id="fActive" checked
+                        style="width:16px;height:16px;accent-color:var(--accent)"> Show on website
+                </label>
+                <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" id="saveBtn" onclick="saveProperty()">Save Property</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast"></div>
+
+    <script>
+        const SUPABASE_URL = 'https://fzmdysptevsovhjcsddy.supabase.co';
+        const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ6bWR5c3B0ZXZzb3ZoamNzZGR5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NDE1NDksImV4cCI6MjA4NzUxNzU0OX0.avJogGiDexAan0I4fxbWbxYh1U0pPcyTWjhzooZJRhA';
+        const IK_PRIVATE = 'private_fNCiyVk1JxxHJw93nHAyeCRleBA=';
+        const IK_BASE = 'https://ik.imagekit.io/shreebalaji';
+        const IK_TR = '?tr=w-400,h-250,q-80,fo-auto';
+
+        const { createClient } = supabase;
+        const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+        let allProps = [];
+        let currentFilter = 'all';
+        let editingId = null;
+        let pendingImages = [];
+        let tagValues = [];
+
+        // ── AUTH ──
+        async function doLogin() {
+            const pw = document.getElementById('pwInput').value.trim();
+            const err = document.getElementById('loginErr');
+            err.textContent = '';
+            if (!pw) return;
+            try {
+                const { data, error } = await sb.from('admin_config').select('admin_password').eq('id', 1).single();
+                if (error) throw error;
+                if (data.admin_password === pw) {
+                    sessionStorage.setItem('sba_auth', '1');
+                    document.getElementById('loginScreen').style.display = 'none';
+                    document.getElementById('adminApp').style.display = 'block';
+                    loadProperties();
+                } else {
+                    err.textContent = 'Incorrect password.';
+                }
+            } catch (e) {
+                err.textContent = 'Connection error. Try again.';
+            }
+        }
+
+        function doLogout() {
+            sessionStorage.removeItem('sba_auth');
+            location.reload();
+        }
+
+        // Check if already logged in
+        if (sessionStorage.getItem('sba_auth') === '1') {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('adminApp').style.display = 'block';
+            loadProperties();
+        }
+
+        // ── LOAD PROPERTIES ──
+        async function loadProperties() {
+            try {
+                const { data, error } = await sb.from('properties').select('*').order('sort_order').order('created_at');
+                if (error) throw error;
+                allProps = data || [];
+                document.getElementById('propCount').textContent = allProps.length + ' Properties';
+                renderTable();
+            } catch (e) {
+                showToast('Failed to load properties', 'error');
+            } finally {
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('propTable').style.display = 'table';
+            }
+        }
+
+        function setFilter(f, btn) {
+            currentFilter = f;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderTable();
+        }
+
+        function renderTable() {
+            let props = allProps;
+            if (currentFilter === 'residential') props = props.filter(p => p.type === 'residential');
+            else if (currentFilter === 'commercial') props = props.filter(p => p.type === 'commercial');
+            else if (currentFilter === 'active') props = props.filter(p => p.is_active);
+            else if (currentFilter === 'inactive') props = props.filter(p => !p.is_active);
+
+            const tbody = document.getElementById('propBody');
+            const empty = document.getElementById('emptyState');
+
+            if (!props.length) {
+                tbody.innerHTML = '';
+                empty.style.display = 'block';
+                return;
+            }
+            empty.style.display = 'none';
+
+            tbody.innerHTML = props.map(p => {
+                const img = p.images && p.images.length ? p.images[0] : null;
+                const thumb = img
+                    ? `<img class="prop-thumb" src="${img}" alt="${p.name}" loading="lazy">`
+                    : `<div class="prop-thumb-placeholder">🏠</div>`;
+                const typeBadge = p.type === 'commercial'
+                    ? `<span class="badge badge-com">Commercial</span>`
+                    : `<span class="badge badge-res">Residential</span>`;
+                return `<tr>
+      <td>${thumb}</td>
+      <td><strong>${p.name}</strong><br><small style="color:var(--muted)">${p.badge}</small></td>
+      <td>${typeBadge}</td>
+      <td>${p.location}</td>
+      <td style="color:var(--muted)">${p.images ? p.images.length : 0} photos</td>
+      <td>
+        <label class="status-toggle" title="${p.is_active ? 'Visible' : 'Hidden'}">
+          <div class="toggle">
+            <input type="checkbox" ${p.is_active ? 'checked' : ''} onchange="toggleActive('${p.id}', this.checked)">
+            <div class="toggle-track"></div>
+            <div class="toggle-thumb"></div>
+          </div>
+          <span style="font-size:.8rem;color:var(--muted)">${p.is_active ? 'Live' : 'Hidden'}</span>
+        </label>
+      </td>
+      <td>
+        <div class="row-actions">
+          <button class="btn btn-ghost btn-sm" onclick="openModal('${p.id}')">✏️ Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteProperty('${p.id}','${p.name.replace(/'/g, '\\'')}')">🗑</button>
+        </div >
+      </td >
+    </tr > `;
+  }).join('');
+}
+
+// ── TOGGLE ACTIVE ──
+async function toggleActive(id, val) {
+  const { error } = await sb.from('properties').update({ is_active: val }).eq('id', id);
+  if (error) { showToast('Update failed', 'error'); loadProperties(); return; }
+  const p = allProps.find(x => x.id === id);
+  if (p) p.is_active = val;
+  showToast(val ? 'Property is now live' : 'Property hidden', 'success');
+}
+
+// ── DELETE ──
+async function deleteProperty(id, name) {
+  if (!confirm(`Delete "${name}" ? This cannot be undone.`)) return;
+  const { error } = await sb.from('properties').delete().eq('id', id);
+  if (error) { showToast('Delete failed', 'error'); return; }
+  allProps = allProps.filter(p => p.id !== id);
+  document.getElementById('propCount').textContent = allProps.length + ' Properties';
+  renderTable();
+  showToast(`"${name}" deleted`, 'success');
+}
+
+// ── MODAL ──
+function openModal(id) {
+  editingId = id || null;
+  pendingImages = [];
+  tagValues = [];
+  document.getElementById('modalTitle').textContent = id ? 'Edit Property' : 'Add Property';
+  document.getElementById('fName').value = '';
+  document.getElementById('fLocation').value = 'Ambernath';
+  document.getElementById('fWA').value = '917767805544';
+  document.getElementById('fIKFolder').value = '';
+  document.getElementById('fImgUrls').value = '';
+  document.getElementById('fActive').checked = true;
+  document.getElementById('fType').value = 'residential';
+  document.getElementById('fBadge').value = 'For Sale';
+  document.getElementById('ikStatus').textContent = '';
+  renderTagList(['Residential', 'Premium', 'Ready to Move']);
+  renderImgPreview([]);
+
+  if (id) {
+    const p = allProps.find(x => x.id === id);
+    if (p) {
+      document.getElementById('fName').value = p.name;
+      document.getElementById('fLocation').value = p.location;
+      document.getElementById('fWA').value = p.whatsapp_number;
+      document.getElementById('fActive').checked = p.is_active;
+      document.getElementById('fType').value = p.type;
+      document.getElementById('fBadge').value = p.badge;
+      renderTagList(p.features || []);
+      pendingImages = [...(p.images || [])];
+      renderImgPreview(pendingImages);
+    }
+  }
+
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  editingId = null;
+}
+
+// ── TAGS ──
+function renderTagList(tags) {
+  tagValues = [...tags];
+  const list = document.getElementById('tagList');
+  list.innerHTML = tagValues.map((t, i) =>
+    `< span class="tag" > ${ t } <span class="tag-remove" onclick="removeTag(${i})">×</span></span > `
+  ).join('');
+}
+
+function handleTagKey(e) {
+  if (e.key === 'Enter' || e.key === ',') {
+    e.preventDefault();
+    const v = e.target.value.trim();
+    if (v) { tagValues.push(v); e.target.value = ''; renderTagList(tagValues); }
+  }
+  if (e.key === 'Backspace' && !e.target.value && tagValues.length) {
+    tagValues.pop(); renderTagList(tagValues);
+  }
+}
+
+function removeTag(i) { tagValues.splice(i, 1); renderTagList(tagValues); }
+
+// ── IMAGEKIT FETCH ──
+async function fetchIKImages() {
+  const folder = document.getElementById('fIKFolder').value.trim();
+  const status = document.getElementById('ikStatus');
+  if (!folder) { status.textContent = 'Enter a folder path first.'; status.className = 'ik-status err'; return; }
+  status.textContent = 'Fetching images...'; status.className = 'ik-status';
+
+  try {
+    const ikPath = folder.startsWith('/') ? folder : '/' + folder;
+    const encodedPath = encodeURIComponent(ikPath);
+    const b64 = btoa(IK_PRIVATE + ':');
+    const resp = await fetch(`https://api.imagekit.io/v1/files?path=${encodedPath}&limit=200&type=file`, {
+                headers: { Authorization: 'Basic ' + b64 }
+            });
+            const data = await resp.json();
+            if (!data || !data.length) {
+                status.textContent = 'No images found. Check the folder path.'; status.className = 'ik-status err'; return;
+            }
+            const urls = data.map(f => IK_BASE + f.filePath + IK_TR);
+            pendingImages = [...pendingImages, ...urls];
+            renderImgPreview(pendingImages);
+            status.textContent = `✓ Loaded ${urls.length} images from ImageKit`; status.className = 'ik-status ok';
+        } catch (e) {
+            status.textContent = 'Failed to fetch. Check folder name.'; status.className = 'ik-status err';
+        }
+}
+
+        function renderImgPreview(imgs) {
+            const row = document.getElementById('imgPreviewRow');
+            if (!imgs.length) { row.innerHTML = '<div style="color:var(--muted);font-size:.82rem;padding:4px 0">No images yet</div>'; return; }
+            row.innerHTML = imgs.map((url, i) =>
+                `<div class="img-preview-item">
+      <img src="${url}" alt="img ${i + 1}">
+      <button class="img-delete" onclick="removeImg(${i})" title="Remove">×</button>
+    </div>`
+            ).join('');
+        }
+
+        function removeImg(i) { pendingImages.splice(i, 1); renderImgPreview(pendingImages); }
+
+        // ── SAVE ──
+        async function saveProperty() {
+            const name = document.getElementById('fName').value.trim();
+            if (!name) { showToast('Property name is required', 'error'); return; }
+
+            // Combine fetched + manually pasted URLs
+            const pasted = document.getElementById('fImgUrls').value
+                .split('\n').map(l => l.trim()).filter(Boolean);
+            const images = [...new Set([...pendingImages, ...pasted])];
+
+            const payload = {
+                name,
+                type: document.getElementById('fType').value,
+                badge: document.getElementById('fBadge').value,
+                location: document.getElementById('fLocation').value.trim() || 'Ambernath',
+                features: tagValues.length ? tagValues : ['Residential', 'Premium', 'Ready to Move'],
+                images,
+                whatsapp_number: document.getElementById('fWA').value.trim() || '917767805544',
+                is_active: document.getElementById('fActive').checked
+            };
+
+            document.getElementById('saveBtn').textContent = 'Saving...';
+            document.getElementById('saveBtn').disabled = true;
+
+            try {
+                let error;
+                if (editingId) {
+                    ({ error } = await sb.from('properties').update(payload).eq('id', editingId));
+                } else {
+                    payload.sort_order = allProps.length + 1;
+                    ({ error } = await sb.from('properties').insert(payload));
+                }
+                if (error) throw error;
+                showToast(editingId ? 'Property updated!' : 'Property added!', 'success');
+                closeModal();
+                loadProperties();
+            } catch (e) {
+                showToast('Save failed: ' + (e.message || 'Unknown error'), 'error');
+            } finally {
+                document.getElementById('saveBtn').textContent = 'Save Property';
+                document.getElementById('saveBtn').disabled = false;
+            }
+        }
+
+        // ── TOAST ──
+        function showToast(msg, type) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = 'show ' + (type || '');
+            setTimeout(() => t.className = '', 3000);
+        }
+    </script>
+</body>
+
+</html>
