@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function () {
             propertyCards.forEach(card => {
                 const cardTypes = card.getAttribute('data-type') || '';
                 if (filter === 'all' || cardTypes.includes(filter)) {
-                    card.style.display = 'block';
+                    card.style.display = '';
                     card.style.opacity = '0';
                     setTimeout(() => {
                         card.style.opacity = '1';
