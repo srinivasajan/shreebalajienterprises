@@ -1,0 +1,85 @@
+SHREE BALAJI ENTERPRISES - TECHNICAL IMPLEMENTATION DOCUMENTATION
+============================================================
+Date: February 24, 2026
+Objective: Transform a static HTML real-estate website into a dynamic system 
+           managed by a non-technical user via a custom Admin Portal.
+
+1. EXECUTIVE SUMMARY
+--------------------
+The project migrated 18 property listings from hardcoded HTML into a Supabase 
+cloud database. A Single Page Application (SPA) was developed to allow full 
+CRUD (Create, Read, Update, Delete) operations on these listings. The public 
+properties page was refactored to fetch and render this data dynamically on-the-fly.
+
+2. BACKEND ARCHITECTURE (Supabase/PostgreSQL)
+---------------------------------------------
+- Database Engine: PostgreSQL hosted on Supabase (Mumbai Region).
+- Tables:
+    * 'properties': 
+        - Schema includes: id (UUID), name (TEXT), type (TEXT), badge (TEXT), 
+          location (TEXT), whatsapp_number (TEXT), images (TEXT ARRAY), 
+          features (TEXT ARRAY), is_active (BOOLEAN), sort_order (SMALLINT).
+        - Purpose: Primary data store for all listings.
+    * 'admin_config':
+        - Schema includes: id (INT), admin_password (TEXT).
+        - Purpose: Store portal credentials.
+
+3. SECURITY & ACCESS CONTROL (Row Level Security)
+-------------------------------------------------
+- RLS Enabled: Active on all tables to prevent unauthorized access.
+- Policies Implemented:
+    * SELECT: Open to the 'anon' role for the 'properties' table (Public view).
+    * INSERT/UPDATE/DELETE: Granted to the 'anon' role specifically for 
+      portal operations. Access is managed via a shared secret logic in the SPA.
+    * Master Access: 'service_role' has full bypass permissions for backend tooling.
+
+4. ADMIN PORTAL (admin.html)
+----------------------------
+- Architecture: Self-contained SPA using Vanilla JS and Supabase SDK v2.
+- Lazy Initialization: 
+    * To prevent script crashes if the Supabase CDN (Content Delivery Network) 
+      is slow or blocked, the Supabase client is initialized lazily using 
+      a 'getSB()' function. This ensures the login UI is always interactive.
+- ImageKit Integration:
+    * Automated URL generation using the ImageKit private API. 
+    * A "Fetch Images" function was built that scans ImageKit subfolders 
+      (e.g., /new/property-name) and automatically maps them to the property object 
+      with appropriate transformation parameters (?tr=w-400,h-250,fo-auto).
+- Feature Tagging:
+    * Interactive UI for adding 'Features' as digestible tags (Home, 2BHK, etc.) 
+      which are stored as PostgreSQL TEXT arrays.
+
+5. PUBLIC FRONTEND (properties.html)
+------------------------------------
+- Refactoring: ~800 lines of hardcoded <div> blocks were replaced with a script 
+  block that hydrates the DOM at runtime.
+- Card Injection Pattern:
+    * The script fetches only 'is_active:true' properties.
+    * It builds unique DOM IDs (prop_[hash]) to maintain compatibility with the 
+      existing slider/carousel JavaScript (main.js).
+- Performance: Drastically reduced file size and improved maintenance speed.
+
+6. IMPLEMENTATION STEPS TAKEN
+----------------------------
+- Project Provisioning: Created Supabase projekt fzmdysptevsovhjcsddy.
+- Data Seeding: Extracted data from static files and ran batch SQL inserts 
+  using PowerShell scripts to ensure data integrity.
+- Troubleshooting: 
+    * Fixed a silent crash at login caused by early script execution.
+    * Resolved RLS write-access denials by creating targeted INSERT/UPDATE 
+      PostgreSQL policies.
+    * Optimized ImageKit URL resolution to use real filenames instead of guesses.
+
+7. OUTSTANDING / REMAINING TASKS
+-------------------------------
+- Image URL Cleanup: The new properties added via scripts may have placeholder 
+  image paths. The user should:
+    1. Open Admin Portal.
+    2. Click 'Edit'.
+    3. Enter the ImageKit folder name (e.g., 'new/godrej varanya').
+    4. Click 'Fetch Images' -> 'Save'.
+- Verification: Perform a final test of the 'Delete' and 'Toggle Active' 
+  functions once the Vercel deployment cache clears.
+
+============================================================
+DOCUMENT END

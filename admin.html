@@ -879,14 +879,24 @@
     <div id="toast"></div>
 
     <script>
+        // v1.0.3 - Fixed script init race condition
+        console.log("Admin Portal Script Initializing...");
+
         const SUPABASE_URL = 'https://fzmdysptevsovhjcsddy.supabase.co';
         const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ6bWR5c3B0ZXZzb3ZoamNzZGR5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NDE1NDksImV4cCI6MjA4NzUxNzU0OX0.avJogGiDexAan0I4fxbWbxYh1U0pPcyTWjhzooZJRhA';
         const IK_PRIVATE = 'private_fNCiyVk1JxxHJw93nHAyeCRleBA=';
         const IK_BASE = 'https://ik.imagekit.io/shreebalaji';
         const IK_TR = '?tr=w-400,h-250,q-80,fo-auto';
 
-        const { createClient } = supabase;
-        const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+        // Supabase is initialized lazily (only after login) so a CDN
+        // loading issue never prevents the login button from working.
+        let _sb = null;
+        function getSB() {
+            if (!_sb) {
+                _sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+            }
+            return _sb;
+        }
 
         let allProps = [];
         let currentFilter = 'all';
@@ -919,17 +929,19 @@
             location.reload();
         }
 
-        // Check if already logged in
-        if (sessionStorage.getItem('sba_auth') === '1') {
-            document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('adminApp').style.display = 'block';
-            loadProperties();
-        }
+        // Check if already logged in on load
+        window.addEventListener('DOMContentLoaded', () => {
+            if (sessionStorage.getItem('sba_auth') === '1') {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('adminApp').style.display = 'block';
+                loadProperties();
+            }
+        });
 
         // ── LOAD PROPERTIES ──
         async function loadProperties() {
             try {
-                const { data, error } = await sb.from('properties').select('*').order('sort_order').order('created_at');
+                const { data, error } = await getSB().from('properties').select('*').order('sort_order').order('created_at');
                 if (error) throw error;
                 allProps = data || [];
                 document.getElementById('propCount').textContent = allProps.length + ' Properties';
@@ -1002,7 +1014,7 @@
 
 // ── TOGGLE ACTIVE ──
 async function toggleActive(id, val) {
-  const { error } = await sb.from('properties').update({ is_active: val }).eq('id', id);
+  const { error } = await getSB().from('properties').update({ is_active: val }).eq('id', id);
   if (error) { showToast('Update failed', 'error'); loadProperties(); return; }
   const p = allProps.find(x => x.id === id);
   if (p) p.is_active = val;
@@ -1012,7 +1024,7 @@ async function toggleActive(id, val) {
 // ── DELETE ──
 async function deleteProperty(id, name) {
   if (!confirm(`Delete "${name}" ? This cannot be undone.`)) return;
-  const { error } = await sb.from('properties').delete().eq('id', id);
+  const { error } = await getSB().from('properties').delete().eq('id', id);
   if (error) { showToast('Delete failed', 'error'); return; }
   allProps = allProps.filter(p => p.id !== id);
   document.getElementById('propCount').textContent = allProps.length + ' Properties';
@@ -1150,10 +1162,10 @@ async function fetchIKImages() {
             try {
                 let error;
                 if (editingId) {
-                    ({ error } = await sb.from('properties').update(payload).eq('id', editingId));
+                    ({ error } = await getSB().from('properties').update(payload).eq('id', editingId));
                 } else {
                     payload.sort_order = allProps.length + 1;
-                    ({ error } = await sb.from('properties').insert(payload));
+                    ({ error } = await getSB().from('properties').insert(payload));
                 }
                 if (error) throw error;
                 showToast(editingId ? 'Property updated!' : 'Property added!', 'success');
