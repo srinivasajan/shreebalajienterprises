@@ -4,34 +4,37 @@
  */
 
 // ========================================
-// Page Transition Curtain
+// Top Progress Bar (navigation indicator)
 // ========================================
 (function () {
-    var curtain = document.createElement('div');
-    curtain.id = 'page-curtain';
-    // inject into <html> so it's present before <body> paints
-    document.documentElement.appendChild(curtain);
+    var bar = document.createElement('div');
+    bar.id = 'page-progress';
+    document.documentElement.appendChild(bar);
 
-    // fade out once page is ready
+    // kick off loading bar as early as possible
+    requestAnimationFrame(function () { bar.classList.add('nprogress-busy'); });
+
+    // complete when DOM is ready
     document.addEventListener('DOMContentLoaded', function () {
-        requestAnimationFrame(function () {
-            requestAnimationFrame(function () { curtain.classList.add('out'); });
-        });
+        bar.classList.replace('nprogress-busy', 'nprogress-done');
+        setTimeout(function () {
+            bar.style.display = 'none';
+        }, 500);
     });
 
-    // fade in before navigating to another page
+    // show bar when user clicks an internal link (no page block)
     document.addEventListener('click', function (e) {
         var a = e.target.closest('a[href]');
         if (!a) return;
         var raw = a.getAttribute('href') || '';
-        // skip blank-target, mailto, tel, hash, javascript links
         if (a.target === '_blank' || /^(mailto:|tel:|#|javascript)/.test(raw)) return;
-        // skip external links
         if (a.hostname && a.hostname !== location.hostname) return;
-        e.preventDefault();
-        curtain.classList.remove('out');
-        var dest = a.href;
-        setTimeout(function () { location.href = dest; }, 400);
+        // reset and start the bar — browser handles actual navigation
+        bar.style.display = '';
+        bar.style.opacity = '1';
+        bar.classList.remove('nprogress-busy', 'nprogress-done');
+        bar.style.width = '0%';
+        requestAnimationFrame(function () { bar.classList.add('nprogress-busy'); });
     }, true);
 })();
 
