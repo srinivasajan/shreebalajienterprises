@@ -14,7 +14,10 @@
     <style>
         /* ── Property Detail Modal ── */
         .pd-overlay {
-            display: none;
+            display: flex;
+            visibility: hidden;
+            opacity: 0;
+            pointer-events: none;
             position: fixed;
             inset: 0;
             background: rgba(0,0,0,.65);
@@ -24,8 +27,13 @@
             justify-content: center;
             padding: 16px;
             overflow-y: auto;
+            transition: opacity .28s ease, visibility .28s ease;
         }
-        .pd-overlay.open { display: flex; }
+        .pd-overlay.open {
+            visibility: visible;
+            opacity: 1;
+            pointer-events: auto;
+        }
         .pd-modal {
             background: #fff;
             border-radius: 20px;
@@ -36,6 +44,11 @@
             box-shadow: 0 20px 60px rgba(0,0,0,.35);
             margin: auto;
             position: relative;
+            transform: translateY(22px) scale(.96);
+            transition: transform .35s cubic-bezier(.34,1.26,.64,1);
+        }
+        .pd-overlay.open .pd-modal {
+            transform: translateY(0) scale(1);
         }
         .pd-close {
             position: absolute;
@@ -240,6 +253,54 @@
 
         /* ── Card feature tags wrap ── */
         .property-card__features { flex-wrap: wrap !important; row-gap: 6px !important; }
+
+        /* ── Card entrance animation ── */
+        @keyframes propCardIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .property-card {
+            animation: propCardIn .48s cubic-bezier(.22,1,.36,1) both;
+        }
+        /* cards fading out during filter */
+        .property-card.hiding {
+            animation: none !important;
+            opacity: 0;
+            transform: scale(.95);
+            transition: opacity .18s ease, transform .18s ease;
+            pointer-events: none;
+        }
+
+        /* ── Image fade-in in cards ── */
+        .slider-images img { opacity: 0; transition: opacity .4s ease; }
+        .slider-images img.loaded { opacity: 1; }
+        .slider-images img.active { opacity: 1; } /* active overrides until loaded fires */
+
+        /* ── Skeleton loader ── */
+        @keyframes shimmer {
+            from { background-position: -400px 0; }
+            to   { background-position: 400px 0; }
+        }
+        .skel {
+            background: linear-gradient(90deg, #f0f2f8 25%, #e4e8f4 50%, #f0f2f8 75%);
+            background-size: 800px 100%;
+            animation: shimmer 1.5s infinite linear;
+            border-radius: 8px;
+        }
+        .skel-card {
+            background: #fff;
+            border: 1px solid #e5e7f0;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        .skel-img  { height: 195px; border-radius: 0; }
+        .skel-body { padding: 18px 20px; }
+        .skel-type { height: 11px; width: 70px; margin-bottom: 14px; }
+        .skel-title{ height: 19px; width: 80%; margin-bottom: 10px; }
+        .skel-loc  { height: 13px; width: 52%; margin-bottom: 22px; }
+        .skel-feat { height: 11px; width: 100%; margin-bottom: 6px; }
+        .skel-feat2{ height: 11px; width: 65%; margin-bottom: 18px; }
+        .skel-btns { height: 38px; width: 100%; border-radius: 10px; }
     </style>
 </head>
 
@@ -296,20 +357,11 @@
             <div class="properties-grid">
                 <!-- Properties loaded dynamically from Supabase -->
 
-                <div id="propsLoader" style="grid-column:1/-1;padding:60px;text-align:center;color:#8b92b8">
-
-                    <div style="display:flex;gap:6px;justify-content:center;margin-bottom:12px">
-
-                        <span style="width:8px;height:8px;background:#4f7cff;border-radius:50%;animation:bounce .8s infinite alternate;display:inline-block"></span>
-
-                        <span style="width:8px;height:8px;background:#4f7cff;border-radius:50%;animation:bounce .8s .15s infinite alternate;display:inline-block"></span>
-
-                        <span style="width:8px;height:8px;background:#4f7cff;border-radius:50%;animation:bounce .8s .3s infinite alternate;display:inline-block"></span>
-
-                    </div>
-
-                    Loading properties...
-
+                <div id="propsLoader" style="display:contents">
+                    <div class="skel-card"><div class="skel skel-img"></div><div class="skel-body"><div class="skel skel-type"></div><div class="skel skel-title"></div><div class="skel skel-loc"></div><div class="skel skel-feat"></div><div class="skel skel-feat2"></div><div class="skel skel-btns"></div></div></div>
+                    <div class="skel-card"><div class="skel skel-img"></div><div class="skel-body"><div class="skel skel-type"></div><div class="skel skel-title"></div><div class="skel skel-loc"></div><div class="skel skel-feat"></div><div class="skel skel-feat2"></div><div class="skel skel-btns"></div></div></div>
+                    <div class="skel-card"><div class="skel skel-img"></div><div class="skel-body"><div class="skel skel-type"></div><div class="skel skel-title"></div><div class="skel skel-loc"></div><div class="skel skel-feat"></div><div class="skel skel-feat2"></div><div class="skel skel-btns"></div></div></div>
+                    <div class="skel-card"><div class="skel skel-img"></div><div class="skel-body"><div class="skel skel-type"></div><div class="skel skel-title"></div><div class="skel skel-loc"></div><div class="skel skel-feat"></div><div class="skel skel-feat2"></div><div class="skel skel-btns"></div></div></div>
                 </div>
 
 
@@ -498,7 +550,7 @@
             _propMap[id] = p;
             const imgs = p.images || [];
             const slides = imgs.map((url, i) =>
-                `<img class="slide${i===0?' active':''}" src="${url}" alt="${p.name} ${i+1}" loading="lazy">`
+                `<img class="slide${i===0?' active':''}" src="${url}" alt="${p.name} ${i+1}" loading="lazy" onload="this.classList.add('loaded')">`
             ).join('');
             const waText = encodeURIComponent('Hi, I am interested in ' + p.name + '. Please share more details.');
             const { info, tags } = parseFeatures(p.features);
@@ -536,16 +588,44 @@
                 if (error) throw error;
                 const loader = document.getElementById('propsLoader');
                 if (loader) loader.remove();
-                (data || []).forEach(p => {
+                (data || []).forEach(function(p, idx) {
                     const el = document.createElement('div');
                     el.innerHTML = renderCard(p).trim();
-                    grid.appendChild(el.firstChild);
+                    const card = el.firstChild;
+                    card.style.animationDelay = (idx * 0.07) + 's';
+                    grid.appendChild(card);
                 });
-                if (typeof initFilters === 'function') initFilters();
+                bindFilters();
             } catch(e) {
                 const loader = document.getElementById('propsLoader');
-                if (loader) loader.innerHTML = '<p style="color:#dc2626">Failed to load properties. Please refresh.</p>';
+                if (loader) loader.innerHTML = '<div style="grid-column:1/-1;padding:48px;text-align:center;color:#dc2626">Failed to load properties. Please refresh.</div>';
             }
+        }
+
+        function bindFilters() {
+            document.querySelectorAll('.filter-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+                    this.classList.add('active');
+                    const filter = this.getAttribute('data-filter');
+                    document.querySelectorAll('.property-card').forEach(function(card, i) {
+                        const types = card.getAttribute('data-type') || '';
+                        if (filter === 'all' || types.includes(filter)) {
+                            card.classList.remove('hiding');
+                            card.style.display = '';
+                            card.style.animation = 'none';
+                            void card.offsetWidth;
+                            card.style.animation = '';
+                            card.style.animationDelay = (i * 0.05) + 's';
+                        } else {
+                            card.classList.add('hiding');
+                            setTimeout(function() {
+                                if (card.classList.contains('hiding')) card.style.display = 'none';
+                            }, 200);
+                        }
+                    });
+                });
+            });
         }
 
         loadProperties();
