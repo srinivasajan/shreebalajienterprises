@@ -4,32 +4,14 @@
  */
 
 // ========================================
-// Playing Card Page Transition
+// Page-as-Card Transition (fallback for non-View-Transition browsers)
 // ========================================
 (function () {
-    // Build the card element
-    var card = document.createElement('div');
-    card.id = 'page-card';
-    card.innerHTML =
-        '<div id="pc-center">&#9830;</div>' +
-        '<div class="pc-corner pc-tl"><span class="pc-suit">&#9830;</span><span class="pc-label">SBE</span></div>' +
-        '<div class="pc-corner pc-tr"><span class="pc-suit">&#9830;</span><span class="pc-label">SBE</span></div>' +
-        '<div class="pc-corner pc-bl"><span class="pc-suit">&#9830;</span><span class="pc-label">SBE</span></div>' +
-        '<div class="pc-corner pc-br"><span class="pc-suit">&#9830;</span><span class="pc-label">SBE</span></div>';
+    // Chrome 126+ handles transitions natively via @view-transition CSS
+    if ('startViewTransition' in document) return;
 
-    // Inject before <body> so it's the first thing painted
-    document.documentElement.appendChild(card);
-
-    // On DOMContentLoaded: deal the card off the bottom
-    document.addEventListener('DOMContentLoaded', function () {
-        requestAnimationFrame(function () {
-            requestAnimationFrame(function () {
-                card.classList.add('card-off');
-            });
-        });
-    });
-
-    // On internal link click: deal the card in from below, then navigate
+    // Fallback: animate the body element itself as a card
+    // Exit: sweep left + rotate on link click
     document.addEventListener('click', function (e) {
         var a = e.target.closest('a[href]');
         if (!a) return;
@@ -37,14 +19,16 @@
         if (a.target === '_blank' || /^(mailto:|tel:|#|javascript)/.test(raw)) return;
         if (a.hostname && a.hostname !== location.hostname) return;
         e.preventDefault();
+        document.body.classList.add('vt-exit');
         var dest = a.href;
-        // Instantly snap card to below-screen (no transition)
-        card.classList.add('card-instant', 'card-off');
-        card.offsetHeight; // force reflow
-        // Remove both — card now animates from below up to cover screen
-        card.classList.remove('card-instant', 'card-off');
-        setTimeout(function () { location.href = dest; }, 540);
+        setTimeout(function () { location.href = dest; }, 440);
     }, true);
+
+    // Enter: deal in from the right on page load
+    document.addEventListener('DOMContentLoaded', function () {
+        document.body.classList.add('vt-enter');
+        setTimeout(function () { document.body.classList.remove('vt-enter'); }, 460);
+    });
 })();
 
 document.addEventListener('DOMContentLoaded', function () {
