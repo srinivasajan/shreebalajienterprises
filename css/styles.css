@@ -1602,16 +1602,13 @@ img {
 }
 
 /* ── Page-as-Card Transitions ──
-   Chrome 126+: @view-transition captures both pages as layers —
-     old page animates out, new page (real content) animates in simultaneously.
-     No blank screen — both pages visible at once.
-   Firefox/Safari: body-class fallback (body slides, html bg shows beneath).
+   document.startViewTransition() + fetch does the heavy lifting:
+   - old page is captured as a screenshot layer  → sweeps left
+   - new page content is injected live            → deals in from right
+   Both visible simultaneously — no blank screen.
+   html background shows in the gap during body-class fallback.
 ---------------------------------------------------------- */
 
-/* Tell Chrome to activate cross-document transitions automatically */
-@view-transition { navigation: auto; }
-
-/* Light card background visible during Firefox/Safari body slide */
 html { background: #e8ecf5; }
 
 @keyframes card-deal-out {
@@ -1623,7 +1620,7 @@ html { background: #e8ecf5; }
     to   { transform: translateX(0)     rotate(0deg);   }
 }
 
-/* Chrome 126+: animate the captured page screenshots */
+/* startViewTransition pseudo-elements */
 ::view-transition-old(root) {
     animation: card-deal-out 0.55s cubic-bezier(.55,0,.35,1) both;
     transform-origin: 50% 110%;
@@ -1633,7 +1630,7 @@ html { background: #e8ecf5; }
     transform-origin: 50% 110%;
 }
 
-/* Firefox/Safari body-class fallback */
+/* Body-class fallback for Firefox/Safari and hard-nav pages */
 body.vt-exit {
     animation: card-deal-out 0.55s cubic-bezier(.55,0,.35,1) both;
     transform-origin: 50% 110%;

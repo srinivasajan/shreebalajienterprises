@@ -5,22 +5,96 @@
 
 // ========================================
 // Page-as-Card Transition
-// Chrome 126+: CSS @view-transition handles it natively.
-//   - Browser captures screenshots of BOTH pages and animates them together.
-//   - Old page slides left, new page (real content) is already visible behind it.
-//   - We must NOT intercept clicks on Chrome — let native navigation fire.
-// Firefox/Safari: sessionStorage body-class fallback.
+// Uses document.startViewTransition() + fetch to swap page content.
+// Chrome captures old page screenshot, swaps in new content, animates both
+// simultaneously — old page sweeps left, new page (live) comes in from right.
 // ========================================
 (function () {
     var KEY = 'sbe-card-nav';
-    // Detect cross-document View Transition support (Chrome 126+)
-    // Using @starting-style support as a reliable proxy for Chrome 117+,
-    // but @view-transition navigation:auto needs 126+. Check via Navigation API.
-    var hasNativeCrossDocVT = !!(window.navigation && window.navigation.addEventListener);
 
-    if (hasNativeCrossDocVT) return; // Chrome handles it — don't touch navigation
+    // Pages with complex server scripts — do normal navigation for these
+    var HARD_NAV_PAGES = ['properties.html', 'admin.html'];
 
-    // Firefox / Safari fallback: animate body, navigate after
+    function isHardNav(url) {
+        return HARD_NAV_PAGES.some(function (p) { return url.indexOf(p) !== -1; });
+    }
+
+    function reinitPage() {
+        // Re-bind nav toggle
+        var toggle = document.getElementById('navToggle');
+        var menu   = document.getElementById('navMenu');
+        if (toggle && menu) {
+            toggle.onclick = function () {
+                toggle.classList.toggle('active');
+                menu.classList.toggle('active');
+            };
+            menu.querySelectorAll('.nav__link').forEach(function (l) {
+                l.addEventListener('click', function () {
+                    toggle.classList.remove('active');
+                    menu.classList.remove('active');
+                });
+            });
+        }
+        // Mark active nav link
+        var path = location.pathname.split('/').pop() || 'index.html';
+        document.querySelectorAll('.nav__link').forEach(function (l) {
+            l.classList.toggle('nav__link--active', l.getAttribute('href') === path);
+        });
+        // Re-bind scroll observer for fade-in elements
+        document.querySelectorAll('.fade-in').forEach(function (el) {
+            el.classList.remove('visible');
+        });
+        var obs = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    obs.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+        document.querySelectorAll('.fade-in').forEach(function (el) { obs.observe(el); });
+        // Re-bind nav scroll shadow
+        var nav = document.querySelector('.nav');
+        if (nav) {
+            nav.classList.toggle('nav--scrolled', window.scrollY > 50);
+        }
+        window.scrollTo(0, 0);
+    }
+
+    function doTransition(dest) {
+        // Hard-nav pages: just navigate (they have own complex scripts)
+        if (isHardNav(dest)) {
+            sessionStorage.setItem(KEY, '1');
+            document.body.classList.add('vt-exit');
+            setTimeout(function () { location.href = dest; }, 580);
+            return;
+        }
+
+        // startViewTransition available (Chrome 111+, Edge 111+)
+        if (document.startViewTransition) {
+            fetch(dest, { credentials: 'same-origin' })
+                .then(function (r) { return r.text(); })
+                .then(function (html) {
+                    var parser = new DOMParser();
+                    var newDoc = parser.parseFromString(html, 'text/html');
+                    document.startViewTransition(function () {
+                        document.body.innerHTML = newDoc.body.innerHTML;
+                        document.title = newDoc.title;
+                        history.pushState(null, newDoc.title, dest);
+                        reinitPage();
+                    });
+                })
+                .catch(function () { location.href = dest; });
+            return;
+        }
+
+        // Fallback: body-class animation then navigate
+        sessionStorage.setItem(KEY, '1');
+        document.body.classList.add('vt-exit');
+        setTimeout(function () { location.href = dest; }, 580);
+    }
+
+    // Intercept all internal link clicks
     document.addEventListener('click', function (e) {
         var a = e.target.closest('a[href]');
         if (!a) return;
@@ -28,12 +102,10 @@
         if (a.target === '_blank' || /^(mailto:|tel:|#|javascript)/.test(raw)) return;
         if (a.hostname && a.hostname !== location.hostname) return;
         e.preventDefault();
-        sessionStorage.setItem(KEY, '1');
-        document.body.classList.add('vt-exit');
-        var dest = a.href;
-        setTimeout(function () { location.href = dest; }, 580);
+        doTransition(a.href);
     }, true);
 
+    // Fallback enter animation on hard-nav pages
     document.addEventListener('DOMContentLoaded', function () {
         if (!sessionStorage.getItem(KEY)) return;
         sessionStorage.removeItem(KEY);
