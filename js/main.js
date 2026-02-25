@@ -5,13 +5,21 @@
 
 // ========================================
 // Page-as-Card Transition
-// Works on ALL browsers via sessionStorage.
-// body = the card.  html = the felt table.
+// Current page sweeps left revealing a card stack underneath.
+// New page deals in from the right over the stack.
 // ========================================
 (function () {
     var SESSION_KEY = 'sbe-card-nav';
 
-    // ── On any internal link click: animate body out, then navigate ──
+    // Build the deck that sits behind the current page during exit
+    function injectStack() {
+        var stack = document.createElement('div');
+        stack.id = 'card-stack';
+        // Insert BEFORE body so it renders below body in the stacking order
+        document.documentElement.insertBefore(stack, document.body);
+    }
+
+    // Intercept internal link clicks
     document.addEventListener('click', function (e) {
         var a = e.target.closest('a[href]');
         if (!a) return;
@@ -20,19 +28,20 @@
         if (a.hostname && a.hostname !== location.hostname) return;
         e.preventDefault();
         var dest = a.href;
-        sessionStorage.setItem(SESSION_KEY, '1');   // tell next page to animate in
-        document.body.classList.add('vt-exit');      // sweep this page left
-        setTimeout(function () { location.href = dest; }, 460);
+        injectStack();                               // show card deck underneath
+        sessionStorage.setItem(SESSION_KEY, '1');    // tell next page to deal in
+        document.body.classList.add('vt-exit');      // sweep current page left
+        setTimeout(function () { location.href = dest; }, 730);
     }, true);
 
-    // ── On load: if we just navigated, deal the new page in from the right ──
+    // On new page load: deal the page in from the right
     document.addEventListener('DOMContentLoaded', function () {
         if (sessionStorage.getItem(SESSION_KEY)) {
             sessionStorage.removeItem(SESSION_KEY);
             document.body.classList.add('vt-enter');
             setTimeout(function () {
                 document.body.classList.remove('vt-enter');
-            }, 500);
+            }, 700);
         }
     });
 })();

@@ -1602,31 +1602,70 @@ img {
 }
 
 /* ── Page-as-Card Transitions ──
-   body is the card. html is the felt table behind it.
-   JS adds .vt-exit on click (sweep left).
-   JS adds .vt-enter on load (deal in from right).
+   body = current card, slides off to the left.
+   #card-stack = the deck underneath, visible during the slide.
+   New page deals in from the right over the deck.
 ---------------------------------------------------------- */
 
-/* Dark gap between cards — the felt table */
-html { background: #002d5c; }
+/* Felt table colour shown at the very edges */
+html { background: #001f40; }
+
+/* The deck of cards sitting underneath the current page */
+#card-stack {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background: #ffffff;
+    border-radius: 2px;
+    box-shadow: 0 8px 48px rgba(0,0,0,.25);
+    overflow: visible;
+}
+/* Card 2 - peeking from behind, slight right-tilt */
+#card-stack::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: #f2f5fa;
+    transform: rotate(3deg) translate(10px, 5px);
+    transform-origin: 50% 110%;
+    box-shadow: 0 6px 30px rgba(0,0,0,.12);
+    border-radius: 2px;
+    z-index: -1;
+}
+/* Card 3 - furthest back */
+#card-stack::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: #e6ecf5;
+    transform: rotate(6deg) translate(20px, 10px);
+    transform-origin: 50% 110%;
+    box-shadow: 0 4px 20px rgba(0,0,0,.08);
+    border-radius: 2px;
+    z-index: -2;
+}
 
 @keyframes card-deal-out {
     0%   { transform: translateX(0)     rotate(0deg);   }
-    100% { transform: translateX(-120%) rotate(-18deg); }
+    100% { transform: translateX(-115%) rotate(-15deg); }
 }
 @keyframes card-deal-in {
-    0%   { transform: translateX(110%)  rotate(14deg);  }
+    0%   { transform: translateX(108%)  rotate(12deg);  }
     100% { transform: translateX(0)     rotate(0deg);   }
 }
 
+/* Current page sweeping off — lifted above the deck with z-index */
 body.vt-exit {
-    animation: card-deal-out 0.45s cubic-bezier(.6, 0, .4, 1) both;
+    position: relative;
+    z-index: 1;
+    animation: card-deal-out 0.72s cubic-bezier(.5, 0, .3, 1) both;
     transform-origin: 50% 110%;
     pointer-events: none;
     overflow: hidden;
 }
+/* New page dealing in from the right */
 body.vt-enter {
-    animation: card-deal-in 0.45s cubic-bezier(.16, 1, .3, 1) both;
+    animation: card-deal-in 0.65s cubic-bezier(.16, 1, .3, 1) both;
     transform-origin: 50% 110%;
 }
 
