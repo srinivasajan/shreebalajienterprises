@@ -1469,6 +1469,28 @@ img {
         gap: var(--sp-5);
     }
 
+    /* Tighter section spacing on mobile */
+    .section {
+        padding: var(--sp-12) 0;
+    }
+
+    .section__header {
+        margin-bottom: var(--sp-8);
+    }
+
+    .page-header {
+        padding: calc(68px + var(--sp-8)) 0 var(--sp-8);
+    }
+
+    /* Slimmer location card image on mobile */
+    .service__photo {
+        height: 190px;
+    }
+
+    .service__body {
+        padding: var(--sp-4) var(--sp-5) var(--sp-5);
+    }
+
     .contact__grid {
         grid-template-columns: 1fr;
     }
@@ -1494,6 +1516,54 @@ img {
 
     .whatsapp {
         bottom: 80px;
+    }
+}
+
+@media (max-width: 480px) {
+    .section {
+        padding: var(--sp-10) 0;
+    }
+
+    .section__header {
+        margin-bottom: var(--sp-6);
+    }
+
+    .section__title {
+        font-size: 1.5rem;
+    }
+
+    .page-header {
+        padding: calc(68px + var(--sp-6)) 0 var(--sp-6);
+    }
+
+    .page-header__title {
+        font-size: 1.6rem;
+    }
+
+    .service__photo {
+        height: 170px;
+    }
+
+    .service__body {
+        padding: var(--sp-3) var(--sp-4) var(--sp-4);
+    }
+
+    .service__body .service__title {
+        font-size: 1.05rem;
+    }
+
+    .service__body .service__text {
+        font-size: 0.875rem;
+        margin-bottom: var(--sp-3);
+    }
+
+    .service__photo-badge {
+        font-size: 0.65rem;
+        padding: 2px 8px;
+    }
+
+    .container {
+        padding: 0 var(--sp-4);
     }
 }
 
