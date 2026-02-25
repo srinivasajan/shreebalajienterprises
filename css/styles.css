@@ -549,6 +549,74 @@ img {
 }
 
 /* ========================================
+   LOCATION CARDS - Photo Cards
+   ======================================== */
+.locations-grid {
+    gap: var(--sp-8);
+}
+
+.location-card {
+    padding: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.service__photo {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    flex-shrink: 0;
+}
+
+.service__photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.5s ease;
+}
+
+.location-card:hover .service__photo img {
+    transform: scale(1.07);
+}
+
+.service__photo-badge {
+    position: absolute;
+    bottom: 10px;
+    left: 12px;
+    background: rgba(0, 0, 0, 0.55);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    backdrop-filter: blur(4px);
+    letter-spacing: 0.03em;
+}
+
+.service__body {
+    padding: var(--sp-7);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.service__body .service__icon {
+    margin-bottom: var(--sp-4);
+}
+
+.service__body .service__title {
+    margin-bottom: var(--sp-2);
+}
+
+.service__body .service__text {
+    flex: 1;
+}
+
+/* ========================================
    PROPERTY TYPES - Dark Section
    ======================================== */
 .types {
