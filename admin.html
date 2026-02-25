@@ -773,17 +773,17 @@
                 </div>
                 <div class="form-group">
                     <label>Category / Status</label>
-                    <input type="text" id="fBadge" list="badgeOptions" placeholder="e.g. For Sale" oninput="updatePricingFields()">
-                    <datalist id="badgeOptions">
-                        <option value="For Sale">
-                        <option value="For Rent">
-                        <option value="Buy">
-                        <option value="Sold">
-                        <option value="New Launch">
-                        <option value="Under Construction">
-                        <option value="Resale">
-                        <option value="Premium">
-                    </datalist>
+                    <select id="fBadge" onchange="updatePricingFields()">
+                        <option value="">— Select —</option>
+                        <option value="For Sale">For Sale</option>
+                        <option value="For Rent">For Rent</option>
+                        <option value="Buy">Buy</option>
+                        <option value="Sold">Sold</option>
+                        <option value="New Launch">New Launch</option>
+                        <option value="Under Construction">Under Construction</option>
+                        <option value="Resale">Resale</option>
+                        <option value="Premium">Premium</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label>City / Town</label>
