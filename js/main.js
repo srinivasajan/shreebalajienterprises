@@ -4,14 +4,23 @@
  */
 
 // ========================================
-// Page-as-Card Transition — all browsers
-// Intercept every internal link click, animate body out,
-// navigate, then animate new body in.
+// Page-as-Card Transition
+// Chrome 126+: CSS @view-transition handles it natively.
+//   - Browser captures screenshots of BOTH pages and animates them together.
+//   - Old page slides left, new page (real content) is already visible behind it.
+//   - We must NOT intercept clicks on Chrome — let native navigation fire.
+// Firefox/Safari: sessionStorage body-class fallback.
 // ========================================
 (function () {
     var KEY = 'sbe-card-nav';
+    // Detect cross-document View Transition support (Chrome 126+)
+    // Using @starting-style support as a reliable proxy for Chrome 117+,
+    // but @view-transition navigation:auto needs 126+. Check via Navigation API.
+    var hasNativeCrossDocVT = !!(window.navigation && window.navigation.addEventListener);
 
-    // On click: sweep current page off left, then navigate
+    if (hasNativeCrossDocVT) return; // Chrome handles it — don't touch navigation
+
+    // Firefox / Safari fallback: animate body, navigate after
     document.addEventListener('click', function (e) {
         var a = e.target.closest('a[href]');
         if (!a) return;
@@ -25,7 +34,6 @@
         setTimeout(function () { location.href = dest; }, 580);
     }, true);
 
-    // On load: deal new page in from the right
     document.addEventListener('DOMContentLoaded', function () {
         if (!sessionStorage.getItem(KEY)) return;
         sessionStorage.removeItem(KEY);

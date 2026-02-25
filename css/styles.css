@@ -1602,11 +1602,16 @@ img {
 }
 
 /* ── Page-as-Card Transitions ──
-   body slides as a card. html background = the felt/deck beneath.
-   vt-exit: current page sweeps left. vt-enter: new page deals in from right.
+   Chrome 126+: @view-transition captures both pages as layers —
+     old page animates out, new page (real content) animates in simultaneously.
+     No blank screen — both pages visible at once.
+   Firefox/Safari: body-class fallback (body slides, html bg shows beneath).
 ---------------------------------------------------------- */
 
-/* Deck beneath — light card colour so the gap feels physical */
+/* Tell Chrome to activate cross-document transitions automatically */
+@view-transition { navigation: auto; }
+
+/* Light card background visible during Firefox/Safari body slide */
 html { background: #e8ecf5; }
 
 @keyframes card-deal-out {
@@ -1618,6 +1623,17 @@ html { background: #e8ecf5; }
     to   { transform: translateX(0)     rotate(0deg);   }
 }
 
+/* Chrome 126+: animate the captured page screenshots */
+::view-transition-old(root) {
+    animation: card-deal-out 0.55s cubic-bezier(.55,0,.35,1) both;
+    transform-origin: 50% 110%;
+}
+::view-transition-new(root) {
+    animation: card-deal-in  0.55s cubic-bezier(.16,1,.3,1)  both;
+    transform-origin: 50% 110%;
+}
+
+/* Firefox/Safari body-class fallback */
 body.vt-exit {
     animation: card-deal-out 0.55s cubic-bezier(.55,0,.35,1) both;
     transform-origin: 50% 110%;
@@ -1629,6 +1645,7 @@ body.vt-enter {
     transform-origin: 50% 110%;
 }
 @media (prefers-reduced-motion: reduce) {
+    ::view-transition-old(root), ::view-transition-new(root),
     body.vt-exit, body.vt-enter { animation: none; }
 }
 
