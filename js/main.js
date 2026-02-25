@@ -3,6 +3,38 @@
  * Premium Features JavaScript
  */
 
+// ========================================
+// Page Transition Curtain
+// ========================================
+(function () {
+    var curtain = document.createElement('div');
+    curtain.id = 'page-curtain';
+    // inject into <html> so it's present before <body> paints
+    document.documentElement.appendChild(curtain);
+
+    // fade out once page is ready
+    document.addEventListener('DOMContentLoaded', function () {
+        requestAnimationFrame(function () {
+            requestAnimationFrame(function () { curtain.classList.add('out'); });
+        });
+    });
+
+    // fade in before navigating to another page
+    document.addEventListener('click', function (e) {
+        var a = e.target.closest('a[href]');
+        if (!a) return;
+        var raw = a.getAttribute('href') || '';
+        // skip blank-target, mailto, tel, hash, javascript links
+        if (a.target === '_blank' || /^(mailto:|tel:|#|javascript)/.test(raw)) return;
+        // skip external links
+        if (a.hostname && a.hostname !== location.hostname) return;
+        e.preventDefault();
+        curtain.classList.remove('out');
+        var dest = a.href;
+        setTimeout(function () { location.href = dest; }, 400);
+    }, true);
+})();
+
 document.addEventListener('DOMContentLoaded', function () {
     // ========================================
     // Mobile Navigation
@@ -44,6 +76,39 @@ document.addEventListener('DOMContentLoaded', function () {
     }, observerOptions);
 
     fadeElements.forEach(el => fadeObserver.observe(el));
+
+    // ========================================
+    // Auto Scroll-Reveal for Section Content
+    // ========================================
+    var revealSelectors = [
+        '.section__header', '.cta__content', '.cta h2', '.cta p',
+        '.page-header__title', '.page-header__breadcrumb',
+        '.stat', '.type', '.testimonial', '.location',
+        '.footer__brand', '.footer__links', '.footer__contact',
+        '.contact__item', '.contact-form'
+    ].join(',');
+
+    var revealEls = document.querySelectorAll(revealSelectors);
+    var revealObs = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('revealed');
+                revealObs.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
+
+    revealEls.forEach(function (el) {
+        if (el.classList.contains('fade-in')) return; // already handled
+        el.classList.add('will-reveal');
+        // stagger siblings of the same type inside their parent
+        var siblings = el.parentElement
+            ? Array.from(el.parentElement.children).filter(function (c) { return c.classList.contains('will-reveal'); })
+            : [];
+        var idx = siblings.indexOf(el);
+        if (idx > 0) el.style.transitionDelay = (idx * 0.09) + 's';
+        revealObs.observe(el);
+    });
 
     // ========================================
     // Counter Animation
@@ -259,12 +324,8 @@ ${message}`;
     const nav = document.querySelector('.nav');
     if (nav) {
         window.addEventListener('scroll', () => {
-            if (window.scrollY > 50) {
-                nav.style.boxShadow = '0 2px 20px rgba(0,0,0,0.08)';
-            } else {
-                nav.style.boxShadow = 'none';
-            }
-        });
+            nav.classList.toggle('nav--scrolled', window.scrollY > 50);
+        }, { passive: true });
     }
 });
 
