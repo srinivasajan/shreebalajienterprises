@@ -4,17 +4,14 @@
  */
 
 // ========================================
-// Page-as-Card Transition
-// Chrome 111+: native View Transitions via meta tag + @view-transition CSS.
-// Firefox/Safari: sessionStorage + body class fallback.
-// Zero DOM manipulation.
+// Page-as-Card Transition — all browsers
+// Intercept every internal link click, animate body out,
+// navigate, then animate new body in.
 // ========================================
 (function () {
     var KEY = 'sbe-card-nav';
-    // If browser handles it natively, do nothing
-    if (typeof document.startViewTransition === 'function') return;
 
-    // Fallback for Firefox / Safari
+    // On click: sweep current page off left, then navigate
     document.addEventListener('click', function (e) {
         var a = e.target.closest('a[href]');
         if (!a) return;
@@ -22,17 +19,18 @@
         if (a.target === '_blank' || /^(mailto:|tel:|#|javascript)/.test(raw)) return;
         if (a.hostname && a.hostname !== location.hostname) return;
         e.preventDefault();
-        document.body.classList.add('vt-exit');
         sessionStorage.setItem(KEY, '1');
+        document.body.classList.add('vt-exit');
         var dest = a.href;
         setTimeout(function () { location.href = dest; }, 580);
     }, true);
 
+    // On load: deal new page in from the right
     document.addEventListener('DOMContentLoaded', function () {
         if (!sessionStorage.getItem(KEY)) return;
         sessionStorage.removeItem(KEY);
         document.body.classList.add('vt-enter');
-        setTimeout(function () { document.body.classList.remove('vt-enter'); }, 600);
+        setTimeout(function () { document.body.classList.remove('vt-enter'); }, 620);
     });
 })();
 

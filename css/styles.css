@@ -1601,29 +1601,23 @@ img {
     transform: translateY(0);
 }
 
-/* ── Page-as-Card Transitions ── */
-@view-transition { navigation: auto; }
+/* ── Page-as-Card Transitions ──
+   body slides as a card. html background = the felt/deck beneath.
+   vt-exit: current page sweeps left. vt-enter: new page deals in from right.
+---------------------------------------------------------- */
+
+/* Deck beneath — light card colour so the gap feels physical */
+html { background: #e8ecf5; }
 
 @keyframes card-deal-out {
     from { transform: translateX(0)     rotate(0deg);   }
     to   { transform: translateX(-110%) rotate(-12deg); }
 }
 @keyframes card-deal-in {
-    from { transform: translateX(105%)  rotate(10deg);  }
+    from { transform: translateX(108%)  rotate(10deg);  }
     to   { transform: translateX(0)     rotate(0deg);   }
 }
 
-/* Chrome 111-125: captured screenshot cross-dissolve -> override with card deal */
-::view-transition-old(root) {
-    animation: card-deal-out 0.55s cubic-bezier(.55,0,.35,1) both;
-    transform-origin: 50% 110%;
-}
-::view-transition-new(root) {
-    animation: card-deal-in  0.55s cubic-bezier(.16,1,.3,1) both;
-    transform-origin: 50% 110%;
-}
-
-/* Firefox / Safari body-class fallback */
 body.vt-exit {
     animation: card-deal-out 0.55s cubic-bezier(.55,0,.35,1) both;
     transform-origin: 50% 110%;
@@ -1631,11 +1625,10 @@ body.vt-exit {
     overflow: hidden;
 }
 body.vt-enter {
-    animation: card-deal-in  0.55s cubic-bezier(.16,1,.3,1) both;
+    animation: card-deal-in  0.55s cubic-bezier(.16,1,.3,1)  both;
     transform-origin: 50% 110%;
 }
 @media (prefers-reduced-motion: reduce) {
-    ::view-transition-old(root), ::view-transition-new(root),
     body.vt-exit, body.vt-enter { animation: none; }
 }
 
