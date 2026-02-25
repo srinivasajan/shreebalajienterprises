@@ -115,7 +115,7 @@ img {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 72px;
+    height: 80px;
 }
 
 .nav__logo {
@@ -146,14 +146,14 @@ img {
 }
 
 .nav__logo-text .line1 {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     font-weight: 700;
     color: var(--accent);
     letter-spacing: -0.02em;
 }
 
 .nav__logo-text .line2 {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     font-weight: 700;
     color: var(--navy);
     letter-spacing: -0.02em;
@@ -229,7 +229,7 @@ img {
    ======================================== */
 .hero {
     background: linear-gradient(135deg, var(--navy) 0%, var(--primary-darker) 100%);
-    padding: calc(72px + var(--sp-20)) 0 var(--sp-16);
+    padding: calc(80px + var(--sp-20)) 0 var(--sp-16);
     position: relative;
     overflow: hidden;
 }
@@ -747,7 +747,7 @@ img {
    ======================================== */
 .page-header {
     background: linear-gradient(135deg, var(--navy) 0%, var(--primary-darker) 100%);
-    padding: calc(72px + var(--sp-12)) 0 var(--sp-12);
+    padding: calc(80px + var(--sp-12)) 0 var(--sp-12);
     text-align: center;
 }
 
@@ -1360,7 +1360,7 @@ img {
 
 @media (max-width: 768px) {
     .hero {
-        padding: calc(72px + var(--sp-12)) 0 var(--sp-12);
+        padding: calc(80px + var(--sp-12)) 0 var(--sp-12);
     }
 
     .hero__actions {
