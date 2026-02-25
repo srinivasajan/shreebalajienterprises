@@ -1603,43 +1603,47 @@ img {
 
 /* ── Page-as-Card Transitions ──
    document.startViewTransition() + fetch does the heavy lifting:
-   - old page is captured as a screenshot layer  → sweeps left
-   - new page content is injected live            → deals in from right
-   Both visible simultaneously — no blank screen.
+   - old page sits on TOP  (z-index:2)  → sweeps left with slight tilt
+   - new page sits BELOW   (z-index:1)  → already there, scales 94%→100%
+   Like removing the top card from a deck: the next card is already underneath.
    html background shows in the gap during body-class fallback.
 ---------------------------------------------------------- */
 
-html { background: #e8ecf5; }
+/* Deck-of-cards background — visible briefly in the gap */
+html { background: #d0d7e8; }
 
-@keyframes card-deal-out {
+/* Old page: on top, sweeps left with slight rotation — like removing the top card */
+@keyframes card-sweep-away {
     from { transform: translateX(0)     rotate(0deg);   }
-    to   { transform: translateX(-110%) rotate(-12deg); }
+    to   { transform: translateX(-110%) rotate(-10deg); }
 }
-@keyframes card-deal-in {
-    from { transform: translateX(108%)  rotate(10deg);  }
-    to   { transform: translateX(0)     rotate(0deg);   }
+
+/* New page: already underneath, scales from 96% → 100% as top card lifts off */
+@keyframes card-rise {
+    from { transform: scale(0.94); }
+    to   { transform: scale(1);    }
 }
 
 /* startViewTransition pseudo-elements */
 ::view-transition-old(root) {
-    animation: card-deal-out 0.55s cubic-bezier(.55,0,.35,1) both;
+    z-index: 2;                                          /* on top  */
+    animation: card-sweep-away 0.52s cubic-bezier(.55,0,.35,1) both;
     transform-origin: 50% 110%;
 }
 ::view-transition-new(root) {
-    animation: card-deal-in  0.55s cubic-bezier(.16,1,.3,1)  both;
-    transform-origin: 50% 110%;
+    z-index: 1;                                          /* underneath */
+    animation: card-rise 0.52s cubic-bezier(.16,1,.3,1) both;
 }
 
-/* Body-class fallback for Firefox/Safari and hard-nav pages */
+/* Body-class fallback (admin.html hard-nav, Firefox/Safari) */
 body.vt-exit {
-    animation: card-deal-out 0.55s cubic-bezier(.55,0,.35,1) both;
+    animation: card-sweep-away 0.52s cubic-bezier(.55,0,.35,1) both;
     transform-origin: 50% 110%;
     pointer-events: none;
     overflow: hidden;
 }
 body.vt-enter {
-    animation: card-deal-in  0.55s cubic-bezier(.16,1,.3,1)  both;
-    transform-origin: 50% 110%;
+    animation: card-rise 0.52s cubic-bezier(.16,1,.3,1) both;
 }
 @media (prefers-reduced-motion: reduce) {
     ::view-transition-old(root), ::view-transition-new(root),
