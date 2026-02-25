@@ -12,11 +12,50 @@
 (function () {
     var KEY = 'sbe-card-nav';
 
-    // Pages with complex server scripts — do normal navigation for these
-    var HARD_NAV_PAGES = ['properties.html', 'admin.html'];
+    // Pages whose scripts cannot be safely re-executed via SPA swap
+    var HARD_NAV_PAGES = ['admin.html'];
 
     function isHardNav(url) {
         return HARD_NAV_PAGES.some(function (p) { return url.indexOf(p) !== -1; });
+    }
+
+    // Re-execute scripts from a parsed document's body.
+    // Skips main.js (already loaded). Handles external CDN scripts by waiting
+    // for them to load before running inline scripts that depend on them.
+    function executeScripts(srcBody) {
+        var scripts = Array.from(srcBody.querySelectorAll('script'));
+        var externals = scripts.filter(function (s) {
+            return s.src && s.src.indexOf('main.js') === -1;
+        });
+        var inlines = scripts.filter(function (s) { return !s.src; });
+
+        function runInlines() {
+            inlines.forEach(function (old) {
+                var s = document.createElement('script');
+                s.textContent = old.textContent;
+                document.body.appendChild(s);
+            });
+        }
+
+        if (externals.length === 0) {
+            runInlines();
+            return;
+        }
+
+        var loaded = 0;
+        externals.forEach(function (old) {
+            var s = document.createElement('script');
+            s.src = old.src;
+            s.onload = function () {
+                loaded++;
+                if (loaded === externals.length) { runInlines(); }
+            };
+            s.onerror = function () {
+                loaded++;
+                if (loaded === externals.length) { runInlines(); }
+            };
+            document.body.appendChild(s);
+        });
     }
 
     function reinitPage() {
@@ -82,6 +121,7 @@
                         document.title = newDoc.title;
                         history.pushState(null, newDoc.title, dest);
                         reinitPage();
+                        executeScripts(newDoc.body);
                     });
                 })
                 .catch(function () { location.href = dest; });
