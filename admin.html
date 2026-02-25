@@ -831,9 +831,34 @@
                         <option value="Premium">
                     </datalist>
                 </div>
-                <div class="form-group full">
-                    <label>Location</label>
-                    <input type="text" id="fLocation" placeholder="e.g. Ambernath">
+                <div class="form-group">
+                    <label>City / Town</label>
+                    <input type="text" id="fLocation" list="locationOptions" placeholder="e.g. Ambernath">
+                    <datalist id="locationOptions">
+                        <option value="Ambernath">
+                        <option value="Ambernath East">
+                        <option value="Ambernath West">
+                        <option value="Badlapur">
+                        <option value="Badlapur East">
+                        <option value="Badlapur West">
+                        <option value="Ulhasnagar">
+                        <option value="Kalyan">
+                        <option value="Dombivli">
+                        <option value="Thane">
+                        <option value="Navi Mumbai">
+                        <option value="Mumbai">
+                        <option value="Bhiwandi">
+                        <option value="Vasai">
+                        <option value="Virar">
+                        <option value="Panvel">
+                        <option value="Khopoli">
+                        <option value="Karjat">
+                        <option value="Khalapur">
+                    </datalist>
+                </div>
+                <div class="form-group">
+                    <label>Sub-locality / Sector</label>
+                    <input type="text" id="fSubLocality" placeholder="e.g. Shivaji Nagar, Sector 5">
                 </div>
 
                 <!-- ── PRICING & DETAILS ── -->
@@ -1113,13 +1138,14 @@ function openModal(id) {
   tagValues = [];
   document.getElementById('modalTitle').textContent = id ? 'Edit Property' : 'Add Property';
   document.getElementById('fName').value = '';
-  document.getElementById('fLocation').value = 'Ambernath';
+  document.getElementById('fLocation').value = '';
   document.getElementById('fWA').value = '917767805544';
   document.getElementById('fIKFolder').value = '';
   document.getElementById('fImgUrls').value = '';
   document.getElementById('fActive').checked = true;
   document.getElementById('fType').value = 'residential';
-  document.getElementById('fBadge').value = 'For Sale';
+  document.getElementById('fBadge').value = '';
+  document.getElementById('fSubLocality').value = '';
   document.getElementById('fPrice').value = '';
   document.getElementById('fArea').value = '';
   document.getElementById('fBeds').value = '';
@@ -1139,8 +1165,17 @@ function openModal(id) {
       document.getElementById('fLocation').value = p.location;
       document.getElementById('fWA').value = p.whatsapp_number;
       document.getElementById('fActive').checked = p.is_active;
-      document.getElementById('fType').value = p.type;
+      document.getElementById('fType').value = p.type || 'residential';
       document.getElementById('fBadge').value = p.badge || '';
+      // Parse sub-locality from location "City, Sub-locality" format
+      if (p.location && p.location.includes(',')) {
+        const parts = p.location.split(',');
+        document.getElementById('fLocation').value = parts[0].trim();
+        document.getElementById('fSubLocality').value = parts.slice(1).join(',').trim();
+      } else {
+        document.getElementById('fLocation').value = p.location || '';
+        document.getElementById('fSubLocality').value = '';
+      }
       // Parse structured meta back out of features array
       const remaining = [];
       const meta = {};
@@ -1242,7 +1277,7 @@ async function fetchIKImages() {
         // ── SAVE ──
         async function saveProperty() {
             const name = document.getElementById('fName').value.trim();
-            if (!name) { showToast('Property name is required', 'error'); return; }
+            if (!name) name = 'Untitled Property';
 
             // Combine fetched + manually pasted URLs
             const pasted = document.getElementById('fImgUrls').value
@@ -1253,7 +1288,11 @@ async function fetchIKImages() {
                 name,
                 type: document.getElementById('fType').value,
                 badge: document.getElementById('fBadge').value,
-                location: document.getElementById('fLocation').value.trim() || 'Ambernath',
+                location: (() => {
+                    const city = document.getElementById('fLocation').value.trim();
+                    const sub = document.getElementById('fSubLocality').value.trim();
+                    return sub ? `${city || 'Ambernath'}, ${sub}` : (city || 'Ambernath');
+                })(),
                 features: (() => {
                     const meta = [
                         document.getElementById('fPrice').value.trim() ? `Price: ${document.getElementById('fPrice').value.trim()}` : '',
