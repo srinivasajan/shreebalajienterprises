@@ -11,6 +11,191 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* ── Property Detail Modal ── */
+        .pd-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.65);
+            backdrop-filter: blur(3px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            overflow-y: auto;
+        }
+        .pd-overlay.open { display: flex; }
+        .pd-modal {
+            background: #fff;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 900px;
+            max-height: 92vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,.35);
+            margin: auto;
+            position: relative;
+        }
+        .pd-close {
+            position: absolute;
+            top: 14px; right: 16px;
+            background: rgba(0,0,0,.55);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 34px; height: 34px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            z-index: 10;
+            display: flex; align-items: center; justify-content: center;
+            transition: background .2s;
+        }
+        .pd-close:hover { background: rgba(0,0,0,.8); }
+        /* Gallery */
+        .pd-gallery {
+            position: relative;
+            background: #111;
+            border-radius: 20px 20px 0 0;
+            overflow: hidden;
+            height: 340px;
+        }
+        .pd-main-img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            transition: opacity .25s;
+        }
+        .pd-nav {
+            position: absolute;
+            top: 50%; transform: translateY(-50%);
+            background: rgba(0,0,0,.5);
+            color: #fff;
+            border: none;
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            font-size: 1.3rem;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: background .2s;
+        }
+        .pd-nav:hover { background: rgba(0,0,0,.8); }
+        .pd-prev { left: 12px; }
+        .pd-next { right: 12px; }
+        .pd-counter {
+            position: absolute;
+            bottom: 12px; right: 14px;
+            background: rgba(0,0,0,.55);
+            color: #fff;
+            font-size: .78rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+        .pd-thumbs {
+            display: flex;
+            gap: 8px;
+            padding: 10px 16px;
+            overflow-x: auto;
+            background: #1a1a1a;
+            scrollbar-width: thin;
+        }
+        .pd-thumb {
+            width: 60px; height: 44px;
+            object-fit: cover;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            flex-shrink: 0;
+            opacity: .65;
+            transition: opacity .2s, border-color .2s;
+        }
+        .pd-thumb.active { border-color: #3b82f6; opacity: 1; }
+        /* Body */
+        .pd-body { padding: 24px; }
+        .pd-top-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 4px;
+        }
+        .pd-title { font-size: 1.4rem; font-weight: 700; color: #111; }
+        .pd-badge {
+            background: #dbeafe;
+            color: #1d4ed8;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: .82rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .pd-location {
+            color: #6b7280;
+            font-size: .9rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .pd-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .pd-info-item {
+            background: #f8faff;
+            border: 1px solid #e5e7f0;
+            border-radius: 10px;
+            padding: 12px 14px;
+        }
+        .pd-info-label { font-size: .72rem; color: #9ca3af; text-transform: uppercase; letter-spacing: .06em; font-weight: 600; margin-bottom: 4px; }
+        .pd-info-value { font-size: .95rem; font-weight: 600; color: #111; }
+        .pd-features-wrap { margin-bottom: 20px; }
+        .pd-features-label { font-size: .78rem; color: #9ca3af; text-transform: uppercase; letter-spacing: .06em; font-weight: 600; margin-bottom: 10px; }
+        .pd-features {
+            display: flex; flex-wrap: wrap; gap: 8px;
+        }
+        .pd-feat {
+            background: #f0f4ff;
+            color: #3b5bdb;
+            border: 1px solid #c7d2fe;
+            padding: 5px 13px;
+            border-radius: 20px;
+            font-size: .82rem;
+            font-weight: 500;
+        }
+        .pd-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .pd-btn {
+            flex: 1;
+            min-width: 140px;
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-size: .95rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+            transition: transform .15s, box-shadow .15s;
+        }
+        .pd-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,0,0,.15); }
+        .pd-btn--wa  { background: #25d366; color: #fff; }
+        .pd-btn--call{ background: #1d4ed8; color: #fff; }
+        @media(max-width: 600px) {
+            .pd-gallery { height: 230px; }
+            .pd-title { font-size: 1.15rem; }
+            .pd-body { padding: 16px; }
+            .pd-info-grid { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
 </head>
 
 <body>
@@ -64,140 +249,375 @@
 
             <!-- Property Grid -->
             <div class="properties-grid">
-                <!-- Properties loaded dynamically from Supabase -->
-                <div id="propsLoader" style="grid-column:1/-1;padding:60px;text-align:center;color:#8b92b8">
-                    <div style="display:flex;gap:6px;justify-content:center;margin-bottom:12px">
-                        <span style="width:8px;height:8px;background:#4f7cff;border-radius:50%;animation:bounce .8s infinite alternate;display:inline-block"></span>
-                        <span style="width:8px;height:8px;background:#4f7cff;border-radius:50%;animation:bounce .8s .15s infinite alternate;display:inline-block"></span>
-                        <span style="width:8px;height:8px;background:#4f7cff;border-radius:50%;animation:bounce .8s .3s infinite alternate;display:inline-block"></span>
-                    </div>
-                    Loading properties...
-                </div>
-
-            </div><!-- end properties-grid -->
-        </div><!-- end container -->
-    </section><!-- end section -->
-
-    <!-- CTA -->
-    <section class="cta">
-        <div class="container">
-            <div class="cta__content">
-                <h2>Ready to Find Your Dream Property?</h2>
-                <p>Contact us today and let our experts guide you.</p>
-                <a href="contact.html" class="btn btn--primary">Get in Touch</a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer__grid">
-                <div class="footer__brand">
-                    <a href="index.html" class="footer__logo">Shree <span>Balaji</span> Enterprises</a>
-                    <p>Your trusted partner in finding the perfect property in Ambernath and surrounding areas.</p>
-                </div>
-                <div class="footer__links">
-                    <h4>Quick Links</h4>
-                    <ul>
-                        <li><a href="index.html">Home</a></li>
-                        <li><a href="about.html">About Us</a></li>
-                        <li><a href="services.html">Services</a></li>
-                        <li><a href="properties.html">Properties</a></li>
-                        <li><a href="contact.html">Contact</a></li>
-                    </ul>
-                </div>
-                <div class="footer__contact">
-                    <h4>Contact</h4>
-                    <p>ðŸ“ž +91 77678 05544</p>
-                    <p>ðŸ“ Ambernath, Maharashtra</p>
-                    <p>ðŸ• Mon-Sat: 10AM - 7PM</p>
-                </div>
-            </div>
-            <div class="footer__bottom">
-                <p>Â© 2024 Shree Balaji Enterprises. All Rights Reserved.</p>
-                <p style="margin-top:6px;font-size:.78rem">Made with â¤ï¸ by <a href="https://snj.biz.id" target="_blank" style="color:inherit;text-decoration:underline">SNJ</a></p>
-            </div>
-        </div>
-    </footer>
-
-    <!-- WhatsApp Float -->
-    <a href="https://wa.me/917767805544" target="_blank" class="whatsapp" aria-label="WhatsApp">
-        <svg viewBox="0 0 24 24" fill="currentColor">
-            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
-        </svg>
-    </a>
-
-    <script src="js/main.js"></script>
-
-    <!-- Supabase Dynamic Properties -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-    (function() {
-        const SUPABASE_URL  = 'https://fzmdysptevsovhjcsddy.supabase.co';
-        const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ6bWR5c3B0ZXZzb3ZoamNzZGR5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NDE1NDksImV4cCI6MjA4NzUxNzU0OX0.avJogGiDexAan0I4fxbWbxYh1U0pPcyTWjhzooZJRhA';
-        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-
-        const waSvg = '<svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>';
-        const locSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
-
-        const sliderState = {};
-
-        function makeId(name) {
-            return 'prop_' + name.replace(/[^a-zA-Z0-9]/g,'_').slice(0,20) + '_' + Math.random().toString(36).slice(2,6);
-        }
-
-        function renderCard(p) {
-            const id = makeId(p.name);
-            const imgs = p.images || [];
-            const slides = imgs.map((url, i) =>
-                `<img class="slide${i===0?' active':''}" src="${url}" alt="${p.name} ${i+1}" loading="lazy">`
-            ).join('');
-            const waText = encodeURIComponent('Hi, I am interested in ' + p.name + '. Please share more details.');
-            const features = (p.features || []).map(f => `<span>${f}</span>`).join('');
-            const dataType = [
-                p.badge === 'For Sale' ? 'buy' : 'rent',
-                p.type || 'residential'
-            ].join(' ');
-            return `<div class="property-card" data-type="${dataType}">
-                <div class="property-card__image property-card__image--slider" id="${id}">
-                    <div class="property-card__badge">${p.badge || 'For Sale'}</div>
-                    <div class="slider-images">${slides}</div>
-                    ${imgs.length > 1 ? `<button class="slider-btn slider-btn--prev" onclick="changeSlide('${id}',-1)">&#8249;</button><button class="slider-btn slider-btn--next" onclick="changeSlide('${id}',1)">&#8250;</button>` : ''}
-                    <div class="photo-count">ðŸ“· ${imgs.length} Photo${imgs.length!==1?'s':''}</div>
-                </div>
-                <div class="property-card__content">
-                    <div class="property-card__type">${p.type || 'Residential'}</div>
-                    <h3 class="property-card__title">${p.name}</h3>
-                    <div class="property-card__location">${locSvg} ${p.location || 'Ambernath'}</div>
-                    <div class="property-card__features">${features}</div>
-                    <a href="https://wa.me/${p.whatsapp_number || '917767805544'}?text=${waText}" target="_blank" class="property-card__whatsapp">${waSvg} I am Interested</a>
-                </div>
-            </div>`;
-        }
-
-        async function loadProperties() {
-            const grid = document.querySelector('.properties-grid');
-            try {
-                const { data, error } = await sb.from('properties').select('*').eq('is_active', true).order('sort_order').order('created_at');
-                if (error) throw error;
-                const loader = document.getElementById('propsLoader');
-                if (loader) loader.remove();
-                (data || []).forEach(p => {
-                    const el = document.createElement('div');
-                    el.innerHTML = renderCard(p).trim();
-                    grid.appendChild(el.firstChild);
-                });
-                // Re-wire filter buttons if main.js filter depends on DOM
-                if (typeof initFilters === 'function') initFilters();
-            } catch(e) {
-                const loader = document.getElementById('propsLoader');
-                if (loader) loader.innerHTML = '<p style="color:#ff5c5c">Failed to load properties. Please refresh.</p>';
-            }
-        }
-
-        loadProperties();
-    })();
-    </script>
-</body>
+                <!-- Properties loaded dynamically from Supabase -->
+
+                <div id="propsLoader" style="grid-column:1/-1;padding:60px;text-align:center;color:#8b92b8">
+
+                    <div style="display:flex;gap:6px;justify-content:center;margin-bottom:12px">
+
+                        <span style="width:8px;height:8px;background:#4f7cff;border-radius:50%;animation:bounce .8s infinite alternate;display:inline-block"></span>
+
+                        <span style="width:8px;height:8px;background:#4f7cff;border-radius:50%;animation:bounce .8s .15s infinite alternate;display:inline-block"></span>
+
+                        <span style="width:8px;height:8px;background:#4f7cff;border-radius:50%;animation:bounce .8s .3s infinite alternate;display:inline-block"></span>
+
+                    </div>
+
+                    Loading properties...
+
+                </div>
+
+
+
+            </div><!-- end properties-grid -->
+
+        </div><!-- end container -->
+
+    </section><!-- end section -->
+
+
+
+    <!-- CTA -->
+
+    <section class="cta">
+
+        <div class="container">
+
+            <div class="cta__content">
+
+                <h2>Ready to Find Your Dream Property?</h2>
+
+                <p>Contact us today and let our experts guide you.</p>
+
+                <a href="contact.html" class="btn btn--primary">Get in Touch</a>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- Property Detail Modal -->
+    <div class="pd-overlay" id="pdOverlay" onclick="if(event.target===this)closePropModal()">
+        <div class="pd-modal" id="pdModal">
+            <button class="pd-close" onclick="closePropModal()">&#10005;</button>
+            <div class="pd-gallery" id="pdGallery">
+                <img class="pd-main-img" id="pdMainImg" src="" alt="">
+                <button class="pd-nav pd-prev" id="pdPrev" onclick="pdSlide(-1)">&#8249;</button>
+                <button class="pd-nav pd-next" id="pdNext" onclick="pdSlide(1)">&#8250;</button>
+                <div class="pd-counter" id="pdCounter"></div>
+            </div>
+            <div class="pd-thumbs" id="pdThumbs"></div>
+            <div class="pd-body">
+                <div class="pd-top-row">
+                    <div class="pd-title" id="pdTitle"></div>
+                    <div class="pd-badge" id="pdBadge"></div>
+                </div>
+                <div class="pd-location" id="pdLocation"></div>
+                <div class="pd-info-grid" id="pdInfoGrid"></div>
+                <div class="pd-features-wrap" id="pdFeaturesWrap" style="display:none">
+                    <div class="pd-features-label">Features &amp; Amenities</div>
+                    <div class="pd-features" id="pdFeatures"></div>
+                </div>
+                <div class="pd-actions">
+                    <a class="pd-btn pd-btn--wa" id="pdWA" href="#" target="_blank">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
+                        WhatsApp Us
+                    </a>
+                    <a class="pd-btn pd-btn--call" id="pdCall" href="tel:7767805544">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                        Call Now
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+
+    <footer class="footer">
+
+        <div class="container">
+
+            <div class="footer__grid">
+
+                <div class="footer__brand">
+
+                    <a href="index.html" class="footer__logo">Shree <span>Balaji</span> Enterprises</a>
+
+                    <p>Your trusted partner in finding the perfect property in Ambernath and surrounding areas.</p>
+
+                </div>
+
+                <div class="footer__links">
+
+                    <h4>Quick Links</h4>
+
+                    <ul>
+
+                        <li><a href="index.html">Home</a></li>
+
+                        <li><a href="about.html">About Us</a></li>
+
+                        <li><a href="services.html">Services</a></li>
+
+                        <li><a href="properties.html">Properties</a></li>
+
+                        <li><a href="contact.html">Contact</a></li>
+
+                    </ul>
+
+                </div>
+
+                <div class="footer__contact">
+
+                    <h4>Contact</h4>
+
+                    <p>ðŸ“ž +91 77678 05544</p>
+
+                    <p>ðŸ“ Ambernath, Maharashtra</p>
+
+                    <p>ðŸ• Mon-Sat: 10AM - 7PM</p>
+
+                </div>
+
+            </div>
+
+            <div class="footer__bottom">
+
+                <p>Â© 2024 Shree Balaji Enterprises. All Rights Reserved.</p>
+
+                <p style="margin-top:6px;font-size:.78rem">Made with â¤ï¸ by <a href="https://snj.biz.id" target="_blank" style="color:inherit;text-decoration:underline">SNJ</a></p>
+
+            </div>
+
+        </div>
+
+    </footer>
+
+
+
+    <!-- WhatsApp Float -->
+
+    <a href="https://wa.me/917767805544" target="_blank" class="whatsapp" aria-label="WhatsApp">
+
+        <svg viewBox="0 0 24 24" fill="currentColor">
+
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+
+        </svg>
+
+    </a>
+
+
+
+    <script src="js/main.js"></script>
+
+
+
+    <!-- Supabase Dynamic Properties -->
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Supabase Dynamic Properties -->
+    <script>
+    (function() {
+        const SUPABASE_URL  = 'https://fzmdysptevsovhjcsddy.supabase.co';
+        const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ6bWR5c3B0ZXZzb3ZoamNzZGR5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NDE1NDksImV4cCI6MjA4NzUxNzU0OX0.avJogGiDexAan0I4fxbWbxYh1U0pPcyTWjhzooZJRhA';
+        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+        const waSvg = '<svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>';
+        const locSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
+
+        const sliderState = {};
+        const _propMap = {};
+
+        function makeId(name) {
+            return 'prop_' + name.replace(/[^a-zA-Z0-9]/g,'_').slice(0,20) + '_' + Math.random().toString(36).slice(2,6);
+        }
+
+        function parseFeatures(features) {
+            const info = {};
+            const tags = [];
+            const prefixes = {'Price: ':'Price','Area: ':'Area','Rent: ':'Rent','Deposit: ':'Deposit','Age: ':'Age','Facing: ':'Facing'};
+            for (const f of (features || [])) {
+                let matched = false;
+                for (const [prefix, label] of Object.entries(prefixes)) {
+                    if (f.startsWith(prefix)) { info[label] = f.slice(prefix.length); matched = true; break; }
+                }
+                if (!matched) tags.push(f);
+            }
+            return { info, tags };
+        }
+
+        function renderCard(p) {
+            const id = makeId(p.name);
+            _propMap[id] = p;
+            const imgs = p.images || [];
+            const slides = imgs.map((url, i) =>
+                `<img class="slide${i===0?' active':''}" src="${url}" alt="${p.name} ${i+1}" loading="lazy">`
+            ).join('');
+            const waText = encodeURIComponent('Hi, I am interested in ' + p.name + '. Please share more details.');
+            const { info, tags } = parseFeatures(p.features);
+            const previewFeatures = tags.slice(0,3).map(f => `<span>${f}</span>`).join('');
+            const priceOrRent = info['Price'] || info['Rent'] || '';
+            const dataType = [
+                (p.badge||'').toLowerCase().includes('rent') ? 'rent' : 'buy',
+                p.type || 'residential'
+            ].join(' ');
+            return `<div class="property-card" data-type="${dataType}" onclick="openPropModal('${id}')" style="cursor:pointer">
+                <div class="property-card__image property-card__image--slider" id="${id}">
+                    <div class="property-card__badge">${p.badge || 'For Sale'}</div>
+                    <div class="slider-images">${slides}</div>
+                    ${imgs.length > 1 ? `<button class="slider-btn slider-btn--prev" onclick="event.stopPropagation();changeSlide('${id}',-1)">&#8249;</button><button class="slider-btn slider-btn--next" onclick="event.stopPropagation();changeSlide('${id}',1)">&#8250;</button>` : ''}
+                    <div class="photo-count">📷 ${imgs.length} Photo${imgs.length!==1?'s':''}</div>
+                </div>
+                <div class="property-card__content">
+                    <div class="property-card__type">${p.type || 'Residential'}</div>
+                    <h3 class="property-card__title">${p.name}</h3>
+                    <div class="property-card__location">${locSvg} ${p.location || 'Ambernath'}</div>
+                    ${priceOrRent ? `<div style="font-size:1rem;font-weight:700;color:#1d4ed8;margin:6px 0 4px">${priceOrRent}</div>` : ''}
+                    <div class="property-card__features">${previewFeatures}</div>
+                    <div style="margin-top:12px;display:flex;align-items:center;justify-content:space-between">
+                        <a href="https://wa.me/${p.whatsapp_number||'917767805544'}?text=${waText}" target="_blank" onclick="event.stopPropagation()" class="property-card__whatsapp">${waSvg} I am Interested</a>
+                        <span style="font-size:.8rem;color:#6b7280;text-decoration:underline">View Details ›</span>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        async function loadProperties() {
+            const grid = document.querySelector('.properties-grid');
+            try {
+                const { data, error } = await sb.from('properties').select('*').eq('is_active', true).order('sort_order').order('created_at');
+                if (error) throw error;
+                const loader = document.getElementById('propsLoader');
+                if (loader) loader.remove();
+                (data || []).forEach(p => {
+                    const el = document.createElement('div');
+                    el.innerHTML = renderCard(p).trim();
+                    grid.appendChild(el.firstChild);
+                });
+                if (typeof initFilters === 'function') initFilters();
+            } catch(e) {
+                const loader = document.getElementById('propsLoader');
+                if (loader) loader.innerHTML = '<p style="color:#dc2626">Failed to load properties. Please refresh.</p>';
+            }
+        }
+
+        loadProperties();
+
+        // ── Property Detail Modal ──
+        let _pdImgs = [], _pdIdx = 0;
+
+        window.openPropModal = function(id) {
+            const p = _propMap[id];
+            if (!p) return;
+            const imgs = p.images || [];
+            _pdImgs = imgs;
+            _pdIdx  = 0;
+
+            const mainImg = document.getElementById('pdMainImg');
+            mainImg.src = imgs[0] || '';
+            mainImg.alt = p.name;
+            document.getElementById('pdGallery').style.display = imgs.length ? '' : 'none';
+            document.getElementById('pdPrev').style.display = imgs.length > 1 ? '' : 'none';
+            document.getElementById('pdNext').style.display = imgs.length > 1 ? '' : 'none';
+            pdUpdateCounter();
+
+            const thumbsEl = document.getElementById('pdThumbs');
+            thumbsEl.style.display = imgs.length > 1 ? '' : 'none';
+            thumbsEl.innerHTML = imgs.map((url, i) =>
+                `<img class="pd-thumb${i===0?' active':''}" src="${url}" onclick="pdGoTo(${i})" loading="lazy">`
+            ).join('');
+
+            document.getElementById('pdTitle').textContent = p.name;
+            const badgeEl = document.getElementById('pdBadge');
+            badgeEl.textContent = p.badge || '';
+            badgeEl.style.display = p.badge ? '' : 'none';
+            document.getElementById('pdLocation').innerHTML =
+                locSvg + ' ' + (p.location || 'Ambernath') + ' &nbsp;&middot;&nbsp; <span style="text-transform:capitalize">' + (p.type||'Residential') + '</span>';
+
+            const { info, tags } = parseFeatures(p.features);
+            const unitTypes = ['Studio','Shop','Office','Showroom','Warehouse','Plot / Land'];
+            const unitTag = tags.find(t => t.includes('BHK') || unitTypes.includes(t));
+            const parkTag = tags.find(t => t.includes('Parking'));
+            const infoItems = [
+                info['Price']   ? { label:'Price',        val:info['Price']   } : null,
+                info['Rent']    ? { label:'Rent / Month',  val:info['Rent']    } : null,
+                info['Deposit'] ? { label:'Deposit',       val:info['Deposit'] } : null,
+                info['Area']    ? { label:'Area',          val:info['Area']    } : null,
+                unitTag         ? { label:'Unit Type',     val:unitTag         } : null,
+                info['Age']     ? { label:'Age',           val:info['Age']     } : null,
+                info['Facing']  ? { label:'Facing',        val:info['Facing']  } : null,
+                parkTag         ? { label:'Parking',       val:parkTag         } : null,
+            ].filter(Boolean);
+
+            const grid = document.getElementById('pdInfoGrid');
+            grid.innerHTML = infoItems.map(it =>
+                `<div class="pd-info-item"><div class="pd-info-label">${it.label}</div><div class="pd-info-value">${it.val}</div></div>`
+            ).join('');
+            grid.style.display = infoItems.length ? '' : 'none';
+
+            const extraTags = tags.filter(t =>
+                !t.includes('BHK') && !unitTypes.includes(t) && !t.includes('Parking')
+            );
+            const featWrap = document.getElementById('pdFeaturesWrap');
+            if (extraTags.length) {
+                featWrap.style.display = '';
+                document.getElementById('pdFeatures').innerHTML = extraTags.map(t =>
+                    `<span class="pd-feat">${t}</span>`).join('');
+            } else {
+                featWrap.style.display = 'none';
+            }
+
+            const waNum  = p.whatsapp_number || '917767805544';
+            const waMsg  = encodeURIComponent('Hi, I am interested in ' + p.name + '. Please share more details.');
+            document.getElementById('pdWA').href  = 'https://wa.me/' + waNum + '?text=' + waMsg;
+            document.getElementById('pdCall').href = 'tel:' + waNum.replace(/^91/,'');
+
+            document.getElementById('pdOverlay').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        };
+
+        window.closePropModal = function() {
+            document.getElementById('pdOverlay').classList.remove('open');
+            document.body.style.overflow = '';
+        };
+
+        window.pdSlide = function(dir) {
+            if (!_pdImgs.length) return;
+            _pdIdx = (_pdIdx + dir + _pdImgs.length) % _pdImgs.length;
+            pdRender();
+        };
+
+        window.pdGoTo = function(i) { _pdIdx = i; pdRender(); };
+
+        function pdRender() {
+            const img = document.getElementById('pdMainImg');
+            img.style.opacity = '0';
+            setTimeout(function() { img.src = _pdImgs[_pdIdx]; img.style.opacity = '1'; }, 150);
+            document.querySelectorAll('.pd-thumb').forEach(function(t,i) { t.classList.toggle('active', i===_pdIdx); });
+            const thumbEls = document.querySelectorAll('.pd-thumb');
+            if (thumbEls[_pdIdx]) thumbEls[_pdIdx].scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' });
+            pdUpdateCounter();
+        }
+
+        function pdUpdateCounter() {
+            document.getElementById('pdCounter').textContent =
+                _pdImgs.length > 1 ? (_pdIdx+1) + ' / ' + _pdImgs.length : '';
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (!document.getElementById('pdOverlay').classList.contains('open')) return;
+            if (e.key === 'Escape')     closePropModal();
+            if (e.key === 'ArrowLeft')  pdSlide(-1);
+            if (e.key === 'ArrowRight') pdSlide(1);
+        });
+
+    })();
+    </script>
+</body>
 </html>
