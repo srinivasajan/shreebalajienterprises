@@ -599,22 +599,20 @@ img {
 }
 
 .service__body {
-    padding: var(--sp-7);
+    padding: var(--sp-6) var(--sp-7) var(--sp-7);
     flex: 1;
     display: flex;
     flex-direction: column;
 }
 
-.service__body .service__icon {
-    margin-bottom: var(--sp-4);
-}
-
 .service__body .service__title {
+    font-size: 1.2rem;
     margin-bottom: var(--sp-2);
 }
 
 .service__body .service__text {
     flex: 1;
+    margin-bottom: var(--sp-5);
 }
 
 /* ========================================
