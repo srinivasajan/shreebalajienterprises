@@ -117,6 +117,14 @@
                     var parser = new DOMParser();
                     var newDoc = parser.parseFromString(html, 'text/html');
                     document.startViewTransition(function () {
+                        // Inject page-specific <style> blocks from new page's <head>
+                        document.querySelectorAll('style[data-spa]').forEach(function (s) { s.remove(); });
+                        newDoc.head.querySelectorAll('style').forEach(function (s) {
+                            var el = document.createElement('style');
+                            el.textContent = s.textContent;
+                            el.setAttribute('data-spa', '1');
+                            document.head.appendChild(el);
+                        });
                         document.body.innerHTML = newDoc.body.innerHTML;
                         document.title = newDoc.title;
                         history.pushState(null, newDoc.title, dest);
