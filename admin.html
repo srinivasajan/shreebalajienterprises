@@ -773,7 +773,7 @@
                 </div>
                 <div class="form-group">
                     <label>Category / Status</label>
-                    <input type="text" id="fBadge" list="badgeOptions" placeholder="e.g. For Sale">
+                    <input type="text" id="fBadge" list="badgeOptions" placeholder="e.g. For Sale" oninput="updatePricingFields()">
                     <datalist id="badgeOptions">
                         <option value="For Sale">
                         <option value="For Rent">
@@ -818,7 +818,7 @@
                 <div class="form-group full" style="margin-top:6px">
                     <div class="section-divider">Pricing &amp; Details</div>
                 </div>
-                <div class="form-group">
+                <div class="form-group" id="grpPrice">
                     <label>Price</label>
                     <input type="text" id="fPrice" placeholder="e.g. ₹45 Lakh">
                 </div>
@@ -847,12 +847,12 @@
                     <label>Age of Property</label>
                     <input type="text" id="fAge" placeholder="e.g. New / 2 Years / Ready Possession">
                 </div>
-                <div class="form-group">
+                <div class="form-group" id="grpRent">
                     <label>Rent / Month</label>
                     <input type="text" id="fRent" placeholder="e.g. ₹12,000">
                 </div>
-                <div class="form-group">
-                    <label>Deposit / Token</label>
+                <div class="form-group" id="grpDeposit">
+                    <label>Deposit / Security</label>
                     <input type="text" id="fDeposit" placeholder="e.g. ₹1 Lakh">
                 </div>
                 <div class="form-group">
@@ -955,6 +955,16 @@
         let editingId = null;
         let pendingImages = [];
         let tagValues = [];
+
+        // ── PRICING FIELD VISIBILITY ──
+        function updatePricingFields() {
+            const val = (document.getElementById('fBadge').value || '').toLowerCase();
+            const isRent = val.includes('rent') || val.includes('lease');
+            const isSale = !isRent; // everything else = sale/buy/default
+            document.getElementById('grpPrice').style.display   = isSale ? '' : 'none';
+            document.getElementById('grpRent').style.display    = isRent ? '' : 'none';
+            document.getElementById('grpDeposit').style.display = isRent ? '' : 'none';
+        }
 
         // ── AUTH ──
         // Password stored here for simple client-side check
@@ -1157,6 +1167,7 @@ function openModal(id) {
     }
   }
 
+  updatePricingFields();
   document.getElementById('modalOverlay').classList.add('open');
 }
 
