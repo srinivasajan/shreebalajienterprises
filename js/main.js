@@ -4,37 +4,46 @@
  */
 
 // ========================================
-// Top Progress Bar (navigation indicator)
+// Playing Card Page Transition
 // ========================================
 (function () {
-    var bar = document.createElement('div');
-    bar.id = 'page-progress';
-    document.documentElement.appendChild(bar);
+    // Build the card element
+    var card = document.createElement('div');
+    card.id = 'page-card';
+    card.innerHTML =
+        '<div id="pc-center">&#9830;</div>' +
+        '<div class="pc-corner pc-tl"><span class="pc-suit">&#9830;</span><span class="pc-label">SBE</span></div>' +
+        '<div class="pc-corner pc-tr"><span class="pc-suit">&#9830;</span><span class="pc-label">SBE</span></div>' +
+        '<div class="pc-corner pc-bl"><span class="pc-suit">&#9830;</span><span class="pc-label">SBE</span></div>' +
+        '<div class="pc-corner pc-br"><span class="pc-suit">&#9830;</span><span class="pc-label">SBE</span></div>';
 
-    // kick off loading bar as early as possible
-    requestAnimationFrame(function () { bar.classList.add('nprogress-busy'); });
+    // Inject before <body> so it's the first thing painted
+    document.documentElement.appendChild(card);
 
-    // complete when DOM is ready
+    // On DOMContentLoaded: deal the card off the bottom
     document.addEventListener('DOMContentLoaded', function () {
-        bar.classList.replace('nprogress-busy', 'nprogress-done');
-        setTimeout(function () {
-            bar.style.display = 'none';
-        }, 500);
+        requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+                card.classList.add('card-off');
+            });
+        });
     });
 
-    // show bar when user clicks an internal link (no page block)
+    // On internal link click: deal the card in from below, then navigate
     document.addEventListener('click', function (e) {
         var a = e.target.closest('a[href]');
         if (!a) return;
         var raw = a.getAttribute('href') || '';
         if (a.target === '_blank' || /^(mailto:|tel:|#|javascript)/.test(raw)) return;
         if (a.hostname && a.hostname !== location.hostname) return;
-        // reset and start the bar — browser handles actual navigation
-        bar.style.display = '';
-        bar.style.opacity = '1';
-        bar.classList.remove('nprogress-busy', 'nprogress-done');
-        bar.style.width = '0%';
-        requestAnimationFrame(function () { bar.classList.add('nprogress-busy'); });
+        e.preventDefault();
+        var dest = a.href;
+        // Instantly snap card to below-screen (no transition)
+        card.classList.add('card-instant', 'card-off');
+        card.offsetHeight; // force reflow
+        // Remove both — card now animates from below up to cover screen
+        card.classList.remove('card-instant', 'card-off');
+        setTimeout(function () { location.href = dest; }, 540);
     }, true);
 })();
 
