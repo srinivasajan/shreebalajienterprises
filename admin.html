@@ -818,11 +818,12 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Badge</label>
+                    <label>Category / Status</label>
                     <input type="text" id="fBadge" list="badgeOptions" placeholder="e.g. For Sale">
                     <datalist id="badgeOptions">
                         <option value="For Sale">
                         <option value="For Rent">
+                        <option value="Buy">
                         <option value="Sold">
                         <option value="New Launch">
                         <option value="Under Construction">
@@ -834,8 +835,76 @@
                     <label>Location</label>
                     <input type="text" id="fLocation" placeholder="e.g. Ambernath">
                 </div>
+
+                <!-- ── PRICING & DETAILS ── -->
+                <div class="form-group full" style="margin-top:6px">
+                    <div style="font-size:.73rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--border);padding-bottom:8px">Pricing &amp; Details</div>
+                </div>
+                <div class="form-group">
+                    <label>Price</label>
+                    <input type="text" id="fPrice" placeholder="e.g. ₹45 Lakh">
+                </div>
+                <div class="form-group">
+                    <label>Area / Size</label>
+                    <input type="text" id="fArea" placeholder="e.g. 1200 sq.ft">
+                </div>
+                <div class="form-group">
+                    <label>Bedrooms / Unit Type</label>
+                    <select id="fBeds">
+                        <option value="">— Select —</option>
+                        <option value="1 BHK">1 BHK</option>
+                        <option value="2 BHK">2 BHK</option>
+                        <option value="3 BHK">3 BHK</option>
+                        <option value="4 BHK">4 BHK</option>
+                        <option value="5+ BHK">5+ BHK</option>
+                        <option value="Studio">Studio</option>
+                        <option value="Shop">Shop</option>
+                        <option value="Office">Office</option>
+                        <option value="Showroom">Showroom</option>
+                        <option value="Warehouse">Warehouse</option>
+                        <option value="Plot">Plot / Land</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Age of Property</label>
+                    <input type="text" id="fAge" placeholder="e.g. New / 2 Years / Ready Possession">
+                </div>
+                <div class="form-group">
+                    <label>Rent / Month</label>
+                    <input type="text" id="fRent" placeholder="e.g. ₹12,000">
+                </div>
+                <div class="form-group">
+                    <label>Deposit / Token</label>
+                    <input type="text" id="fDeposit" placeholder="e.g. ₹1 Lakh">
+                </div>
+                <div class="form-group">
+                    <label>Facing</label>
+                    <select id="fFacing">
+                        <option value="">— Select —</option>
+                        <option value="East Facing">East Facing</option>
+                        <option value="West Facing">West Facing</option>
+                        <option value="North Facing">North Facing</option>
+                        <option value="South Facing">South Facing</option>
+                        <option value="North-East">North-East</option>
+                        <option value="Corner Plot">Corner Plot</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Parking</label>
+                    <select id="fParking">
+                        <option value="">— Select —</option>
+                        <option value="Covered Parking">Covered Parking</option>
+                        <option value="Open Parking">Open Parking</option>
+                        <option value="2-Wheeler Parking">2-Wheeler Parking</option>
+                        <option value="No Parking">No Parking</option>
+                    </select>
+                </div>
+
+                <div class="form-group full" style="margin-top:6px">
+                    <div style="font-size:.73rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--border);padding-bottom:8px">Other Features &amp; Tags</div>
+                </div>
                 <div class="form-group full">
-                    <label>Features (press Enter to add)</label>
+                    <label>Extra Features (press Enter to add)</label>
                     <div class="tag-input-area" onclick="document.getElementById('tagInput').focus()">
                         <div id="tagList"></div>
                         <input class="tag-input" id="tagInput" placeholder="Type and press Enter..."
@@ -1051,8 +1120,16 @@ function openModal(id) {
   document.getElementById('fActive').checked = true;
   document.getElementById('fType').value = 'residential';
   document.getElementById('fBadge').value = 'For Sale';
+  document.getElementById('fPrice').value = '';
+  document.getElementById('fArea').value = '';
+  document.getElementById('fBeds').value = '';
+  document.getElementById('fAge').value = '';
+  document.getElementById('fRent').value = '';
+  document.getElementById('fDeposit').value = '';
+  document.getElementById('fFacing').value = '';
+  document.getElementById('fParking').value = '';
   document.getElementById('ikStatus').textContent = '';
-  renderTagList(['Residential', 'Premium', 'Ready to Move']);
+  renderTagList([]);
   renderImgPreview([]);
 
   if (id) {
@@ -1064,7 +1141,29 @@ function openModal(id) {
       document.getElementById('fActive').checked = p.is_active;
       document.getElementById('fType').value = p.type;
       document.getElementById('fBadge').value = p.badge || '';
-      renderTagList(p.features || []);
+      // Parse structured meta back out of features array
+      const remaining = [];
+      const meta = {};
+      for (const f of (p.features || [])) {
+        if (f.startsWith('Price: ')) meta.price = f.slice(7);
+        else if (f.startsWith('Area: ')) meta.area = f.slice(6);
+        else if (f.startsWith('Rent: ')) meta.rent = f.slice(6).replace('/mo','').trim();
+        else if (f.startsWith('Deposit: ')) meta.deposit = f.slice(9);
+        else if (f.startsWith('Age: ')) meta.age = f.slice(5);
+        else if (f.startsWith('Facing: ')) meta.facing = f.slice(8);
+        else if (/BHK$/.test(f)||['Studio','Shop','Office','Showroom','Warehouse','Plot / Land'].includes(f)) meta.beds = f;
+        else if (f.includes('Parking')) meta.parking = f;
+        else remaining.push(f);
+      }
+      document.getElementById('fPrice').value = meta.price || '';
+      document.getElementById('fArea').value = meta.area || '';
+      document.getElementById('fBeds').value = meta.beds || '';
+      document.getElementById('fAge').value = meta.age || '';
+      document.getElementById('fRent').value = meta.rent || '';
+      document.getElementById('fDeposit').value = meta.deposit || '';
+      document.getElementById('fFacing').value = meta.facing || '';
+      document.getElementById('fParking').value = meta.parking || '';
+      renderTagList(remaining);
       pendingImages = [...(p.images || [])];
       renderImgPreview(pendingImages);
     }
@@ -1155,7 +1254,19 @@ async function fetchIKImages() {
                 type: document.getElementById('fType').value,
                 badge: document.getElementById('fBadge').value,
                 location: document.getElementById('fLocation').value.trim() || 'Ambernath',
-                features: tagValues.length ? tagValues : ['Residential', 'Premium', 'Ready to Move'],
+                features: (() => {
+                    const meta = [
+                        document.getElementById('fPrice').value.trim() ? `Price: ${document.getElementById('fPrice').value.trim()}` : '',
+                        document.getElementById('fArea').value.trim() ? `Area: ${document.getElementById('fArea').value.trim()}` : '',
+                        document.getElementById('fBeds').value || '',
+                        document.getElementById('fParking').value || '',
+                        document.getElementById('fRent').value.trim() ? `Rent: ${document.getElementById('fRent').value.trim()}/mo` : '',
+                        document.getElementById('fDeposit').value.trim() ? `Deposit: ${document.getElementById('fDeposit').value.trim()}` : '',
+                        document.getElementById('fAge').value.trim() ? `Age: ${document.getElementById('fAge').value.trim()}` : '',
+                        document.getElementById('fFacing').value ? `Facing: ${document.getElementById('fFacing').value}` : '',
+                    ].filter(Boolean);
+                    return [...new Set([...meta, ...tagValues])];
+                })(),
                 images,
                 whatsapp_number: document.getElementById('fWA').value.trim() || '917767805544',
                 is_active: document.getElementById('fActive').checked
