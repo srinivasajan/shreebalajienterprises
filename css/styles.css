@@ -147,14 +147,14 @@ img {
 }
 
 .nav__logo-text .line1 {
-    font-size: 1.35rem;
+    font-size: 1.55rem;
     font-weight: 700;
     color: var(--accent);
     letter-spacing: -0.02em;
 }
 
 .nav__logo-text .line2 {
-    font-size: 1.35rem;
+    font-size: 1.55rem;
     font-weight: 700;
     color: var(--navy);
     letter-spacing: -0.02em;
