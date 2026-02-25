@@ -5,49 +5,40 @@
 
 // ========================================
 // Page-as-Card Transition
-// #page-wrap slides (the card). #card-stack is fixed behind it.
-// body stays stationary — only its background is cleared during exit.
+// On click: fetch next page → inject behind current → slide current away to reveal it.
+// No blank screen — real destination content is underneath.
 // ========================================
 (function () {
-    var SESSION_KEY = 'sbe-card-nav';
+    var NAV_KEY  = 'sbe-card-nav';   // deal-in on next load
+    var SKIP_KEY = 'sbe-card-skip';  // skip enter anim (content already shown)
 
-    // Wrap all body children in #page-wrap immediately (before DOMContentLoaded
-    // so it's in place before any paint). Works because this script is at <head>
-    // or top of body — but main.js loads at end of body, so we wrap on exec.
+    // Wrap all body children in #page-wrap (script runs at end of body)
     function wrapPage() {
         if (document.getElementById('page-wrap')) return;
         var wrap = document.createElement('div');
         wrap.id = 'page-wrap';
-        // Move all current body children into wrap
         while (document.body.firstChild) {
             wrap.appendChild(document.body.firstChild);
         }
         document.body.appendChild(wrap);
     }
-
-    // Inject the fixed card stack that sits behind #page-wrap
-    function injectStack() {
-        if (document.getElementById('card-stack')) return;
-        var stack = document.createElement('div');
-        stack.id = 'card-stack';
-        document.body.insertBefore(stack, document.body.firstChild);
-    }
-
-    // Run wrapping immediately (script is at end of body, DOM is available)
     wrapPage();
 
-    // If arriving from a card nav, deal the page in from the right
-    if (sessionStorage.getItem(SESSION_KEY)) {
-        sessionStorage.removeItem(SESSION_KEY);
-        injectStack();
-        var wrap = document.getElementById('page-wrap');
-        if (wrap) {
-            wrap.classList.add('vt-enter');
-            setTimeout(function () { wrap.classList.remove('vt-enter'); }, 700);
+    // Handle enter animation on the new page
+    if (sessionStorage.getItem(SKIP_KEY)) {
+        // Content was already previewed underneath — just finish loading, no animation
+        sessionStorage.removeItem(SKIP_KEY);
+    } else if (sessionStorage.getItem(NAV_KEY)) {
+        // Normal fallback deal-in (fetch failed or slow)
+        sessionStorage.removeItem(NAV_KEY);
+        var w = document.getElementById('page-wrap');
+        if (w) {
+            w.classList.add('vt-enter');
+            setTimeout(function () { w.classList.remove('vt-enter'); }, 700);
         }
     }
 
-    // Intercept internal link clicks — slide current page off, then navigate
+    // Intercept internal link clicks
     document.addEventListener('click', function (e) {
         var a = e.target.closest('a[href]');
         if (!a) return;
@@ -57,13 +48,35 @@
         e.preventDefault();
         var dest = a.href;
         var wrap = document.getElementById('page-wrap');
-        injectStack();                                  // show deck underneath
-        document.body.classList.add('vt-exiting');      // clear body background
-        sessionStorage.setItem(SESSION_KEY, '1');
-        if (wrap) {
-            wrap.classList.add('vt-exit');              // slide page-wrap off left
-        }
-        setTimeout(function () { location.href = dest; }, 760);
+
+        // Create the next-card layer immediately (placeholder while fetching)
+        var nextCard = document.createElement('div');
+        nextCard.id = 'next-card';
+        document.body.insertBefore(nextCard, document.body.firstChild);
+
+        // Fetch the destination page and fill the next-card with its content
+        fetch(dest, { credentials: 'same-origin' })
+            .then(function (r) { return r.text(); })
+            .then(function (html) {
+                var parser = new DOMParser();
+                var doc    = parser.parseFromString(html, 'text/html');
+                // Use its #page-wrap content if it exists, else full body
+                var src = doc.getElementById('page-wrap') || doc.body;
+                nextCard.innerHTML = src.innerHTML;
+                nextCard.classList.add('ready'); // straighten the slight tilt
+                sessionStorage.setItem(SKIP_KEY, '1'); // no enter anim needed
+            })
+            .catch(function () {
+                // Fetch failed — fall back to deal-in animation on next load
+                sessionStorage.setItem(NAV_KEY, '1');
+            });
+
+        // Start slide-off immediately regardless of fetch timing
+        document.body.classList.add('vt-exiting');
+        if (wrap) wrap.classList.add('vt-exit');
+
+        // Navigate after animation completes
+        setTimeout(function () { location.href = dest; }, 780);
     }, true);
 })();
 

@@ -1602,15 +1602,13 @@ img {
 }
 
 /* ── Page-as-Card Transitions ──
-   #page-wrap  = the sliding card (wraps all page content).
-   #card-stack = fixed deck underneath, revealed as #page-wrap slides off.
-   body stays still; only #page-wrap moves.
+   #page-wrap  = current page card (slides off left).
+   #next-card  = next page content, fixed underneath, revealed by the slide.
+   body stays still; background clears during exit.
 ---------------------------------------------------------- */
 
-/* Felt table — shows at edges when stack cards are fanned */
 html { background: #001f40; }
 
-/* Page wrapper — the actual sliding card */
 #page-wrap {
     position: relative;
     z-index: 2;
@@ -1619,53 +1617,37 @@ html { background: #001f40; }
     overflow-x: clip;
 }
 
-/* Fixed card deck that sits behind #page-wrap */
-#card-stack {
+/* Next page content sits fixed behind the current card */
+#next-card {
     position: fixed;
     inset: 0;
     z-index: 1;
-    /* Card 1 — top of deck */
-    background: #f5f7fb;
-    border-radius: 4px;
-    box-shadow: 0 8px 40px rgba(0,0,0,.22);
-}
-/* Card 2 — tilted right, peeking */
-#card-stack::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: #eaeff8;
-    transform: rotate(4deg) translate(14px, 6px);
+    background: var(--white);
+    overflow: hidden;
+    pointer-events: none;
+    /* Slight right-tilt at rest, like the card waiting in the deck */
+    transform: rotate(2deg) translate(8px, 4px);
     transform-origin: 50% 100%;
-    border-radius: 4px;
-    box-shadow: 0 6px 28px rgba(0,0,0,.13);
-    z-index: -1;
+    transition: transform 0.3s cubic-bezier(.16,1,.3,1);
+    border-radius: 2px;
 }
-/* Card 3 — furthest back */
-#card-stack::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: #dde4f0;
-    transform: rotate(8deg) translate(28px, 12px);
-    transform-origin: 50% 100%;
-    border-radius: 4px;
-    box-shadow: 0 4px 18px rgba(0,0,0,.08);
-    z-index: -2;
+/* Once content is loaded, straighten the card */
+#next-card.ready {
+    transform: none;
 }
 
-/* During exit: hide body's own background so stack shows cleanly */
+/* During exit: body background transparent so #next-card shows through */
 body.vt-exiting {
     background: transparent !important;
 }
 
 @keyframes card-deal-out {
-    0%   { transform: translateX(0)     rotate(0deg);   }
-    100% { transform: translateX(-115%) rotate(-15deg); }
+    0%   { transform: translateX(0)      rotate(0deg);   }
+    100% { transform: translateX(-115%)  rotate(-14deg); }
 }
 @keyframes card-deal-in {
-    0%   { transform: translateX(110%)  rotate(12deg);  }
-    100% { transform: translateX(0)     rotate(0deg);   }
+    0%   { transform: translateX(110%)   rotate(12deg);  }
+    100% { transform: translateX(0)      rotate(0deg);   }
 }
 
 #page-wrap.vt-exit {
