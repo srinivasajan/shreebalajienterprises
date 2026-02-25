@@ -145,6 +145,9 @@
         doTransition(a.href);
     }, true);
 
+    // Expose for non-anchor clickable elements (type/service cards)
+    window.sbeGo = doTransition;
+
     // Fallback enter animation on hard-nav pages
     document.addEventListener('DOMContentLoaded', function () {
         if (!sessionStorage.getItem(KEY)) return;
