@@ -119,10 +119,21 @@ img {
 }
 
 .nav__logo {
-    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.1rem;
     font-weight: 700;
     color: var(--navy);
     letter-spacing: -0.02em;
+    text-decoration: none;
+}
+
+.nav__logo-img {
+    height: 46px;
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 1px 3px rgba(0,0,0,0.12));
 }
 
 .nav__logo span {
