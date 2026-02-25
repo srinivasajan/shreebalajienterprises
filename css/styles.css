@@ -1602,58 +1602,36 @@ img {
 }
 
 /* ── Page-as-Card Transitions ──
-   The whole page behaves like a physical playing card.
-   Current page: slides off to the LEFT with a clockwise flick.
-   New page: deals in from the RIGHT, settling flat.
-   No fading — purely positional, like real cards.
+   body is the card. html is the felt table behind it.
+   JS adds .vt-exit on click (sweep left).
+   JS adds .vt-enter on load (deal in from right).
 ---------------------------------------------------------- */
 
-/* Opt both pages in to cross-document view transitions (Chrome 126+) */
-@view-transition {
-    navigation: auto;
-}
-
-/* Fill any gap between cards with dark blue instead of white */
-html {
-    background: #003A70;
-}
+/* Dark gap between cards — the felt table */
+html { background: #002d5c; }
 
 @keyframes card-deal-out {
-    0%   { transform: translateX(0)      rotate(0deg);  }
-    100% { transform: translateX(-130%)  rotate(-22deg); }
+    0%   { transform: translateX(0)     rotate(0deg);   }
+    100% { transform: translateX(-120%) rotate(-18deg); }
 }
 @keyframes card-deal-in {
-    0%   { transform: translateX(115%)   rotate(18deg); }
-    100% { transform: translateX(0)      rotate(0deg);  }
+    0%   { transform: translateX(110%)  rotate(14deg);  }
+    100% { transform: translateX(0)     rotate(0deg);   }
 }
 
-/* Outgoing page: flicked left, pivoting from bottom-centre of card */
-::view-transition-old(root) {
-    animation: card-deal-out .46s cubic-bezier(.55, 0, .4, 1) both;
-    transform-origin: 50% 115%;
-}
-/* Incoming page: dealt from the right, settling flat */
-::view-transition-new(root) {
-    animation: card-deal-in .46s cubic-bezier(.16, 1, .3, 1) .04s both;
-    transform-origin: 50% 115%;
-}
-
-/* Reduce motion */
-@media (prefers-reduced-motion: reduce) {
-    ::view-transition-old(root),
-    ::view-transition-new(root) { animation: none; }
-}
-
-/* Fallback for Firefox/Safari: apply same animations to <body> */
 body.vt-exit {
-    animation: card-deal-out .44s cubic-bezier(.55, 0, .4, 1) both;
-    transform-origin: 50% 115%;
+    animation: card-deal-out 0.45s cubic-bezier(.6, 0, .4, 1) both;
+    transform-origin: 50% 110%;
     pointer-events: none;
     overflow: hidden;
 }
 body.vt-enter {
-    animation: card-deal-in .44s cubic-bezier(.16, 1, .3, 1) both;
-    transform-origin: 50% 115%;
+    animation: card-deal-in 0.45s cubic-bezier(.16, 1, .3, 1) both;
+    transform-origin: 50% 110%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.vt-exit, body.vt-enter { animation: none; }
 }
 
 /* Nav scrolled state */

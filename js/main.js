@@ -4,14 +4,14 @@
  */
 
 // ========================================
-// Page-as-Card Transition (fallback for non-View-Transition browsers)
+// Page-as-Card Transition
+// Works on ALL browsers via sessionStorage.
+// body = the card.  html = the felt table.
 // ========================================
 (function () {
-    // Chrome 126+ handles transitions natively via @view-transition CSS
-    if ('startViewTransition' in document) return;
+    var SESSION_KEY = 'sbe-card-nav';
 
-    // Fallback: animate the body element itself as a card
-    // Exit: sweep left + rotate on link click
+    // ── On any internal link click: animate body out, then navigate ──
     document.addEventListener('click', function (e) {
         var a = e.target.closest('a[href]');
         if (!a) return;
@@ -19,15 +19,21 @@
         if (a.target === '_blank' || /^(mailto:|tel:|#|javascript)/.test(raw)) return;
         if (a.hostname && a.hostname !== location.hostname) return;
         e.preventDefault();
-        document.body.classList.add('vt-exit');
         var dest = a.href;
-        setTimeout(function () { location.href = dest; }, 440);
+        sessionStorage.setItem(SESSION_KEY, '1');   // tell next page to animate in
+        document.body.classList.add('vt-exit');      // sweep this page left
+        setTimeout(function () { location.href = dest; }, 460);
     }, true);
 
-    // Enter: deal in from the right on page load
+    // ── On load: if we just navigated, deal the new page in from the right ──
     document.addEventListener('DOMContentLoaded', function () {
-        document.body.classList.add('vt-enter');
-        setTimeout(function () { document.body.classList.remove('vt-enter'); }, 460);
+        if (sessionStorage.getItem(SESSION_KEY)) {
+            sessionStorage.removeItem(SESSION_KEY);
+            document.body.classList.add('vt-enter');
+            setTimeout(function () {
+                document.body.classList.remove('vt-enter');
+            }, 500);
+        }
     });
 })();
 
