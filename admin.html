@@ -9,26 +9,22 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            --bg: #0f1117;
-            --surface: #1a1d27;
-            --surface2: #22263a;
-            --border: #2e3250;
-            --accent: #4f7cff;
-            --accent-h: #6b93ff;
-            --danger: #ff5c5c;
-            --success: #34d399;
-            --warning: #fbbf24;
-            --text: #e8eaf6;
-            --muted: #8b92b8;
-            --radius: 12px;
-            --shadow: 0 4px 24px rgba(0, 0, 0, .4);
+            --bg:       #f4f6fb;
+            --surface:  #ffffff;
+            --surface2: #f0f2f8;
+            --border:   #dde1ef;
+            --accent:   #2563eb;
+            --accent-h: #1d4ed8;
+            --danger:   #dc2626;
+            --success:  #16a34a;
+            --warning:  #d97706;
+            --text:     #111827;
+            --muted:    #6b7280;
+            --radius:   12px;
+            --shadow:   0 1px 3px rgba(0,0,0,.07), 0 6px 20px rgba(0,0,0,.07);
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0 }
 
         body {
             font-family: 'Inter', sans-serif;
@@ -43,7 +39,8 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            padding: 24px
+            padding: 24px;
+            background: linear-gradient(135deg, #e8eeff 0%, #f4f6fb 100%)
         }
 
         .login-card {
@@ -79,11 +76,12 @@
             color: var(--text);
             font-size: 1rem;
             outline: none;
-            transition: .2s
+            transition: border-color .2s, box-shadow .2s
         }
 
         .login-card input:focus {
-            border-color: var(--accent)
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(37,99,235,.12)
         }
 
         .login-card .btn-login {
@@ -97,11 +95,12 @@
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: .2s
+            transition: background .2s, box-shadow .2s
         }
 
         .login-card .btn-login:hover {
-            background: var(--accent-h)
+            background: var(--accent-h);
+            box-shadow: 0 4px 12px rgba(37,99,235,.3)
         }
 
         .login-err {
@@ -112,9 +111,7 @@
         }
 
         /* ── LAYOUT ── */
-        #adminApp {
-            display: none
-        }
+        #adminApp { display: none }
 
         .topbar {
             background: var(--surface);
@@ -126,7 +123,8 @@
             height: 60px;
             position: sticky;
             top: 0;
-            z-index: 100
+            z-index: 100;
+            box-shadow: 0 1px 4px rgba(0,0,0,.06)
         }
 
         .topbar-brand {
@@ -142,12 +140,13 @@
         }
 
         .badge-count {
-            background: var(--accent);
-            color: #fff;
-            padding: 2px 10px;
+            background: rgba(37,99,235,.1);
+            color: var(--accent);
+            padding: 4px 12px;
             border-radius: 20px;
             font-size: .78rem;
-            font-weight: 600
+            font-weight: 600;
+            border: 1px solid rgba(37,99,235,.2)
         }
 
         .btn-logout {
@@ -163,7 +162,8 @@
 
         .btn-logout:hover {
             border-color: var(--danger);
-            color: var(--danger)
+            color: var(--danger);
+            background: rgba(220,38,38,.05)
         }
 
         .main {
@@ -184,7 +184,8 @@
 
         .actions-row h1 {
             font-size: 1.4rem;
-            font-weight: 700
+            font-weight: 700;
+            color: var(--text)
         }
 
         .btn {
@@ -194,7 +195,7 @@
             font-size: .9rem;
             font-weight: 600;
             cursor: pointer;
-            transition: .2s;
+            transition: background .2s, box-shadow .2s, border-color .2s;
             display: inline-flex;
             align-items: center;
             gap: 6px
@@ -206,7 +207,8 @@
         }
 
         .btn-primary:hover {
-            background: var(--accent-h)
+            background: var(--accent-h);
+            box-shadow: 0 4px 12px rgba(37,99,235,.28)
         }
 
         .btn-danger {
@@ -228,31 +230,35 @@
 
         .btn-ghost:hover {
             border-color: var(--accent);
-            color: var(--accent)
+            color: var(--accent);
+            background: rgba(37,99,235,.05)
         }
 
-        .btn-sm {
-            padding: 6px 14px;
-            font-size: .8rem
-        }
+        .btn-sm { padding: 6px 14px; font-size: .8rem }
 
         /* ── FILTERS ── */
         .filters {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
             margin-bottom: 20px
         }
 
         .filter-btn {
-            padding: 7px 16px;
+            padding: 6px 16px;
             border-radius: 20px;
             border: 1px solid var(--border);
-            background: transparent;
+            background: var(--surface);
             color: var(--muted);
             cursor: pointer;
             font-size: .82rem;
+            font-weight: 500;
             transition: .2s
+        }
+
+        .filter-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent)
         }
 
         .filter-btn.active {
@@ -266,23 +272,22 @@
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: var(--radius);
-            overflow: hidden
+            overflow: hidden;
+            box-shadow: var(--shadow)
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse
-        }
+        table { width: 100%; border-collapse: collapse }
 
         th {
-            padding: 13px 16px;
+            padding: 12px 16px;
             text-align: left;
-            font-size: .78rem;
+            font-size: .75rem;
             font-weight: 600;
             color: var(--muted);
             text-transform: uppercase;
             letter-spacing: .06em;
-            border-bottom: 1px solid var(--border)
+            border-bottom: 1px solid var(--border);
+            background: var(--surface2)
         }
 
         td {
@@ -292,20 +297,16 @@
             vertical-align: middle
         }
 
-        tr:last-child td {
-            border-bottom: none
-        }
+        tr:last-child td { border-bottom: none }
 
-        tr:hover td {
-            background: var(--surface2)
-        }
+        tr:hover td { background: #f8f9ff }
 
         .prop-thumb {
             width: 56px;
             height: 40px;
             object-fit: cover;
             border-radius: 6px;
-            background: var(--surface2)
+            border: 1px solid var(--border)
         }
 
         .prop-thumb-placeholder {
@@ -313,6 +314,7 @@
             height: 40px;
             background: var(--surface2);
             border-radius: 6px;
+            border: 1px solid var(--border);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -323,18 +325,18 @@
         .badge {
             padding: 3px 10px;
             border-radius: 20px;
-            font-size: .75rem;
+            font-size: .74rem;
             font-weight: 600;
             display: inline-block
         }
 
         .badge-res {
-            background: rgba(79, 124, 255, .15);
+            background: rgba(37,99,235,.1);
             color: var(--accent)
         }
 
         .badge-com {
-            background: rgba(251, 191, 36, .15);
+            background: rgba(217,119,6,.1);
             color: var(--warning)
         }
 
@@ -345,29 +347,19 @@
             cursor: pointer
         }
 
-        .toggle {
-            position: relative;
-            width: 38px;
-            height: 20px
-        }
+        .toggle { position: relative; width: 38px; height: 20px }
 
-        .toggle input {
-            opacity: 0;
-            width: 0;
-            height: 0
-        }
+        .toggle input { opacity: 0; width: 0; height: 0 }
 
         .toggle-track {
             position: absolute;
             inset: 0;
-            background: var(--border);
+            background: #d1d5db;
             border-radius: 20px;
             transition: .2s
         }
 
-        .toggle input:checked+.toggle-track {
-            background: var(--success)
-        }
+        .toggle input:checked + .toggle-track { background: var(--success) }
 
         .toggle-thumb {
             position: absolute;
@@ -377,17 +369,13 @@
             height: 14px;
             background: #fff;
             border-radius: 50%;
-            transition: .2s
+            transition: .2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,.2)
         }
 
-        .toggle input:checked~.toggle-thumb {
-            transform: translateX(18px)
-        }
+        .toggle input:checked ~ .toggle-thumb { transform: translateX(18px) }
 
-        .row-actions {
-            display: flex;
-            gap: 8px
-        }
+        .row-actions { display: flex; gap: 8px }
 
         .empty-state {
             text-align: center;
@@ -400,14 +388,15 @@
             height: 48px;
             margin: 0 auto 16px;
             display: block;
-            opacity: .4
+            opacity: .3
         }
 
         /* ── MODAL ── */
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, .7);
+            background: rgba(17,24,39,.45);
+            backdrop-filter: blur(2px);
             z-index: 200;
             display: none;
             align-items: flex-start;
@@ -416,9 +405,7 @@
             overflow-y: auto
         }
 
-        .modal-overlay.open {
-            display: flex
-        }
+        .modal-overlay.open { display: flex }
 
         .modal {
             background: var(--surface);
@@ -427,7 +414,7 @@
             width: 100%;
             max-width: 680px;
             padding: 32px;
-            box-shadow: var(--shadow);
+            box-shadow: 0 8px 40px rgba(0,0,0,.14);
             margin: auto
         }
 
@@ -435,26 +422,29 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 28px
+            margin-bottom: 28px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border)
         }
 
-        .modal-header h2 {
-            font-size: 1.2rem;
-            font-weight: 700
-        }
+        .modal-header h2 { font-size: 1.15rem; font-weight: 700 }
 
         .btn-close {
-            background: transparent;
-            border: none;
+            background: var(--surface2);
+            border: 1px solid var(--border);
             color: var(--muted);
-            font-size: 1.4rem;
+            font-size: 1.1rem;
             cursor: pointer;
             line-height: 1;
-            padding: 4px
+            padding: 6px 10px;
+            border-radius: 8px;
+            transition: .2s
         }
 
         .btn-close:hover {
-            color: var(--text)
+            background: rgba(220,38,38,.08);
+            border-color: var(--danger);
+            color: var(--danger)
         }
 
         .form-grid {
@@ -466,25 +456,23 @@
         .form-group {
             display: flex;
             flex-direction: column;
-            gap: 7px
+            gap: 6px
         }
 
-        .form-group.full {
-            grid-column: 1/-1
-        }
+        .form-group.full { grid-column: 1/-1 }
 
         .form-group label {
-            font-size: .82rem;
+            font-size: .76rem;
             font-weight: 600;
             color: var(--muted);
             text-transform: uppercase;
-            letter-spacing: .04em
+            letter-spacing: .05em
         }
 
         .form-group input,
         .form-group select,
         .form-group textarea {
-            padding: 11px 14px;
+            padding: 10px 13px;
             background: var(--surface2);
             border: 1px solid var(--border);
             border-radius: 9px;
@@ -492,35 +480,41 @@
             font-size: .9rem;
             font-family: inherit;
             outline: none;
-            transition: .2s;
+            transition: border-color .2s, box-shadow .2s;
             width: 100%
         }
 
         .form-group input:focus,
         .form-group select:focus,
         .form-group textarea:focus {
-            border-color: var(--accent)
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+            background: #fff
         }
 
-        .form-group textarea {
-            resize: vertical;
-            min-height: 80px
-        }
+        .form-group textarea { resize: vertical; min-height: 80px }
 
-        .form-group select option {
-            background: var(--surface2)
+        .form-group select option { background: #fff }
+
+        .section-divider {
+            font-size: .72rem;
+            font-weight: 700;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 8px;
+            margin-top: 4px
         }
 
         .img-preview-row {
             display: flex;
             gap: 8px;
             flex-wrap: wrap;
-            margin-top: 8px
+            margin-top: 6px
         }
 
-        .img-preview-item {
-            position: relative
-        }
+        .img-preview-item { position: relative }
 
         .img-preview-item img {
             width: 80px;
@@ -545,7 +539,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            line-height: 1
+            line-height: 1;
+            box-shadow: 0 1px 4px rgba(0,0,0,.2)
         }
 
         .modal-footer {
@@ -560,16 +555,17 @@
         .help-text {
             font-size: .77rem;
             color: var(--muted);
-            margin-top: 4px
+            margin-top: 3px
         }
 
         .fetch-btn {
-            padding: 9px 14px;
+            padding: 10px 16px;
             background: var(--surface2);
             border: 1px solid var(--border);
             border-radius: 9px;
             color: var(--text);
             font-size: .85rem;
+            font-weight: 500;
             cursor: pointer;
             white-space: nowrap;
             transition: .2s
@@ -577,31 +573,16 @@
 
         .fetch-btn:hover {
             border-color: var(--accent);
-            color: var(--accent)
+            color: var(--accent);
+            background: rgba(37,99,235,.05)
         }
 
-        .input-with-btn {
-            display: flex;
-            gap: 8px
-        }
+        .input-with-btn { display: flex; gap: 8px }
+        .input-with-btn input { flex: 1 }
 
-        .input-with-btn input {
-            flex: 1
-        }
-
-        .ik-status {
-            font-size: .78rem;
-            margin-top: 6px;
-            min-height: 16px
-        }
-
-        .ik-status.ok {
-            color: var(--success)
-        }
-
-        .ik-status.err {
-            color: var(--danger)
-        }
+        .ik-status { font-size: .78rem; margin-top: 6px; min-height: 16px }
+        .ik-status.ok  { color: var(--success) }
+        .ik-status.err { color: var(--danger) }
 
         .tag-input-area {
             display: flex;
@@ -613,29 +594,29 @@
             border-radius: 9px;
             min-height: 42px;
             align-items: center;
-            cursor: text
+            cursor: text;
+            transition: border-color .2s, box-shadow .2s
         }
 
         .tag-input-area:focus-within {
-            border-color: var(--accent)
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(37,99,235,.1)
         }
 
         .tag {
-            background: rgba(79, 124, 255, .2);
+            background: rgba(37,99,235,.1);
             color: var(--accent);
-            padding: 3px 10px;
+            padding: 4px 10px;
             border-radius: 20px;
             font-size: .8rem;
+            font-weight: 500;
             display: flex;
             align-items: center;
             gap: 5px
         }
 
-        .tag-remove {
-            cursor: pointer;
-            font-size: .7rem;
-            line-height: 1
-        }
+        .tag-remove { cursor: pointer; font-size: .75rem; line-height: 1; opacity: .7 }
+        .tag-remove:hover { opacity: 1 }
 
         .tag-input {
             border: none;
@@ -654,40 +635,34 @@
             position: fixed;
             bottom: 28px;
             right: 28px;
-            background: var(--surface2);
+            background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 10px;
-            padding: 12px 20px;
-            font-size: .9rem;
+            padding: 13px 20px;
+            font-size: .88rem;
             font-weight: 500;
             opacity: 0;
             transition: opacity .3s;
             z-index: 999;
             pointer-events: none;
-            max-width: 300px
+            max-width: 320px;
+            box-shadow: 0 4px 20px rgba(0,0,0,.12)
         }
 
-        #toast.show {
-            opacity: 1
-        }
+        #toast.show  { opacity: 1 }
 
         #toast.success {
-            border-color: var(--success);
+            border-left: 4px solid var(--success);
             color: var(--success)
         }
 
         #toast.error {
-            border-color: var(--danger);
+            border-left: 4px solid var(--danger);
             color: var(--danger)
         }
 
         /* ── Loader ── */
-        .loader {
-            display: flex;
-            gap: 6px;
-            padding: 40px;
-            justify-content: center
-        }
+        .loader { display: flex; gap: 6px; padding: 40px; justify-content: center }
 
         .loader span {
             width: 8px;
@@ -697,41 +672,20 @@
             animation: bounce .8s infinite alternate
         }
 
-        .loader span:nth-child(2) {
-            animation-delay: .15s
-        }
-
-        .loader span:nth-child(3) {
-            animation-delay: .3s
-        }
+        .loader span:nth-child(2) { animation-delay: .15s }
+        .loader span:nth-child(3) { animation-delay: .3s  }
 
         @keyframes bounce {
-            from {
-                transform: translateY(0)
-            }
-
-            to {
-                transform: translateY(-10px)
-            }
+            from { transform: translateY(0) }
+            to   { transform: translateY(-10px) }
         }
 
         @media(max-width:600px) {
-            .form-grid {
-                grid-template-columns: 1fr
-            }
-
-            .main {
-                padding: 16px
-            }
-
-            .modal {
-                padding: 20px
-            }
-
+            .form-grid { grid-template-columns: 1fr }
+            .main { padding: 16px }
+            .modal { padding: 20px }
             table th:nth-child(3),
-            table td:nth-child(3) {
-                display: none
-            }
+            table td:nth-child(3) { display: none }
         }
     </style>
 </head>
@@ -861,9 +815,8 @@
                     <input type="text" id="fSubLocality" placeholder="e.g. Shivaji Nagar, Sector 5">
                 </div>
 
-                <!-- ── PRICING & DETAILS ── -->
                 <div class="form-group full" style="margin-top:6px">
-                    <div style="font-size:.73rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--border);padding-bottom:8px">Pricing &amp; Details</div>
+                    <div class="section-divider">Pricing &amp; Details</div>
                 </div>
                 <div class="form-group">
                     <label>Price</label>
@@ -926,7 +879,7 @@
                 </div>
 
                 <div class="form-group full" style="margin-top:6px">
-                    <div style="font-size:.73rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--border);padding-bottom:8px">Other Features &amp; Tags</div>
+                    <div class="section-divider">Other Features &amp; Tags</div>
                 </div>
                 <div class="form-group full">
                     <label>Extra Features (press Enter to add)</label>
