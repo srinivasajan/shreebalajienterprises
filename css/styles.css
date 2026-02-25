@@ -1602,47 +1602,61 @@ img {
 }
 
 /* ── Page-as-Card Transitions ──
-   body = current card, slides off to the left.
-   #card-stack = the deck underneath, visible during the slide.
-   New page deals in from the right over the deck.
+   #page-wrap  = the sliding card (wraps all page content).
+   #card-stack = fixed deck underneath, revealed as #page-wrap slides off.
+   body stays still; only #page-wrap moves.
 ---------------------------------------------------------- */
 
-/* Felt table colour shown at the very edges */
+/* Felt table — shows at edges when stack cards are fanned */
 html { background: #001f40; }
 
-/* The deck of cards sitting underneath the current page */
+/* Page wrapper — the actual sliding card */
+#page-wrap {
+    position: relative;
+    z-index: 2;
+    background: var(--white);
+    min-height: 100vh;
+    overflow-x: clip;
+}
+
+/* Fixed card deck that sits behind #page-wrap */
 #card-stack {
     position: fixed;
     inset: 0;
-    z-index: 0;
-    background: #ffffff;
-    border-radius: 2px;
-    box-shadow: 0 8px 48px rgba(0,0,0,.25);
-    overflow: visible;
+    z-index: 1;
+    /* Card 1 — top of deck */
+    background: #f5f7fb;
+    border-radius: 4px;
+    box-shadow: 0 8px 40px rgba(0,0,0,.22);
 }
-/* Card 2 - peeking from behind, slight right-tilt */
+/* Card 2 — tilted right, peeking */
 #card-stack::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: #f2f5fa;
-    transform: rotate(3deg) translate(10px, 5px);
-    transform-origin: 50% 110%;
-    box-shadow: 0 6px 30px rgba(0,0,0,.12);
-    border-radius: 2px;
+    background: #eaeff8;
+    transform: rotate(4deg) translate(14px, 6px);
+    transform-origin: 50% 100%;
+    border-radius: 4px;
+    box-shadow: 0 6px 28px rgba(0,0,0,.13);
     z-index: -1;
 }
-/* Card 3 - furthest back */
+/* Card 3 — furthest back */
 #card-stack::after {
     content: '';
     position: absolute;
     inset: 0;
-    background: #e6ecf5;
-    transform: rotate(6deg) translate(20px, 10px);
-    transform-origin: 50% 110%;
-    box-shadow: 0 4px 20px rgba(0,0,0,.08);
-    border-radius: 2px;
+    background: #dde4f0;
+    transform: rotate(8deg) translate(28px, 12px);
+    transform-origin: 50% 100%;
+    border-radius: 4px;
+    box-shadow: 0 4px 18px rgba(0,0,0,.08);
     z-index: -2;
+}
+
+/* During exit: hide body's own background so stack shows cleanly */
+body.vt-exiting {
+    background: transparent !important;
 }
 
 @keyframes card-deal-out {
@@ -1650,27 +1664,24 @@ html { background: #001f40; }
     100% { transform: translateX(-115%) rotate(-15deg); }
 }
 @keyframes card-deal-in {
-    0%   { transform: translateX(108%)  rotate(12deg);  }
+    0%   { transform: translateX(110%)  rotate(12deg);  }
     100% { transform: translateX(0)     rotate(0deg);   }
 }
 
-/* Current page sweeping off — lifted above the deck with z-index */
-body.vt-exit {
-    position: relative;
-    z-index: 1;
-    animation: card-deal-out 0.72s cubic-bezier(.5, 0, .3, 1) both;
+#page-wrap.vt-exit {
+    animation: card-deal-out 0.75s cubic-bezier(.5, 0, .3, 1) both;
     transform-origin: 50% 110%;
     pointer-events: none;
-    overflow: hidden;
+    will-change: transform;
 }
-/* New page dealing in from the right */
-body.vt-enter {
+#page-wrap.vt-enter {
     animation: card-deal-in 0.65s cubic-bezier(.16, 1, .3, 1) both;
     transform-origin: 50% 110%;
+    will-change: transform;
 }
 
 @media (prefers-reduced-motion: reduce) {
-    body.vt-exit, body.vt-enter { animation: none; }
+    #page-wrap.vt-exit, #page-wrap.vt-enter { animation: none; }
 }
 
 /* Nav scrolled state */

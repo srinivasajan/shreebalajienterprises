@@ -5,21 +5,49 @@
 
 // ========================================
 // Page-as-Card Transition
-// Current page sweeps left revealing a card stack underneath.
-// New page deals in from the right over the stack.
+// #page-wrap slides (the card). #card-stack is fixed behind it.
+// body stays stationary — only its background is cleared during exit.
 // ========================================
 (function () {
     var SESSION_KEY = 'sbe-card-nav';
 
-    // Build the deck that sits behind the current page during exit
-    function injectStack() {
-        var stack = document.createElement('div');
-        stack.id = 'card-stack';
-        // Insert BEFORE body so it renders below body in the stacking order
-        document.documentElement.insertBefore(stack, document.body);
+    // Wrap all body children in #page-wrap immediately (before DOMContentLoaded
+    // so it's in place before any paint). Works because this script is at <head>
+    // or top of body — but main.js loads at end of body, so we wrap on exec.
+    function wrapPage() {
+        if (document.getElementById('page-wrap')) return;
+        var wrap = document.createElement('div');
+        wrap.id = 'page-wrap';
+        // Move all current body children into wrap
+        while (document.body.firstChild) {
+            wrap.appendChild(document.body.firstChild);
+        }
+        document.body.appendChild(wrap);
     }
 
-    // Intercept internal link clicks
+    // Inject the fixed card stack that sits behind #page-wrap
+    function injectStack() {
+        if (document.getElementById('card-stack')) return;
+        var stack = document.createElement('div');
+        stack.id = 'card-stack';
+        document.body.insertBefore(stack, document.body.firstChild);
+    }
+
+    // Run wrapping immediately (script is at end of body, DOM is available)
+    wrapPage();
+
+    // If arriving from a card nav, deal the page in from the right
+    if (sessionStorage.getItem(SESSION_KEY)) {
+        sessionStorage.removeItem(SESSION_KEY);
+        injectStack();
+        var wrap = document.getElementById('page-wrap');
+        if (wrap) {
+            wrap.classList.add('vt-enter');
+            setTimeout(function () { wrap.classList.remove('vt-enter'); }, 700);
+        }
+    }
+
+    // Intercept internal link clicks — slide current page off, then navigate
     document.addEventListener('click', function (e) {
         var a = e.target.closest('a[href]');
         if (!a) return;
@@ -28,22 +56,15 @@
         if (a.hostname && a.hostname !== location.hostname) return;
         e.preventDefault();
         var dest = a.href;
-        injectStack();                               // show card deck underneath
-        sessionStorage.setItem(SESSION_KEY, '1');    // tell next page to deal in
-        document.body.classList.add('vt-exit');      // sweep current page left
-        setTimeout(function () { location.href = dest; }, 730);
-    }, true);
-
-    // On new page load: deal the page in from the right
-    document.addEventListener('DOMContentLoaded', function () {
-        if (sessionStorage.getItem(SESSION_KEY)) {
-            sessionStorage.removeItem(SESSION_KEY);
-            document.body.classList.add('vt-enter');
-            setTimeout(function () {
-                document.body.classList.remove('vt-enter');
-            }, 700);
+        var wrap = document.getElementById('page-wrap');
+        injectStack();                                  // show deck underneath
+        document.body.classList.add('vt-exiting');      // clear body background
+        sessionStorage.setItem(SESSION_KEY, '1');
+        if (wrap) {
+            wrap.classList.add('vt-exit');              // slide page-wrap off left
         }
-    });
+        setTimeout(function () { location.href = dest; }, 760);
+    }, true);
 })();
 
 document.addEventListener('DOMContentLoaded', function () {
