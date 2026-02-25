@@ -630,6 +630,61 @@
             flex: 1
         }
 
+        /* ── Upload Zone ── */
+        .upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            background: var(--surface2);
+            padding: 32px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color .2s, background .2s;
+            position: relative
+        }
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: var(--accent);
+            background: rgba(37,99,235,.04)
+        }
+        .upload-zone input[type=file] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%
+        }
+        .upload-zone .uz-icon { font-size: 2rem; line-height: 1; margin-bottom: 10px }
+        .upload-zone .uz-text { font-size: .95rem; font-weight: 600; color: var(--text) }
+        .upload-zone .uz-sub  { font-size: .8rem; color: var(--muted); margin-top: 4px }
+        .upload-progress-list { display:flex; flex-direction:column; gap:6px; margin-top:12px }
+        .upload-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: .82rem
+        }
+        .upload-item .ui-name { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+        .upload-item .ui-bar-wrap {
+            width: 80px;
+            height: 5px;
+            background: var(--border);
+            border-radius: 10px;
+            overflow: hidden
+        }
+        .upload-item .ui-bar {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 10px;
+            transition: width .3s
+        }
+        .upload-item .ui-status { font-size: .75rem; white-space:nowrap }
+        .upload-item.done  .ui-status { color: var(--success) }
+        .upload-item.error .ui-status { color: var(--danger)  }
+
         /* ── Toast ── */
         #toast {
             position: fixed;
@@ -894,20 +949,19 @@
                     <label>WhatsApp Number</label>
                     <input type="text" id="fWA" placeholder="917767805544" value="917767805544">
                 </div>
-                <div class="form-group full">
-                    <label>ImageKit Folder Path (auto-loads images)</label>
-                    <div class="input-with-btn">
-                        <input type="text" id="fIKFolder" placeholder="e.g. new/godrej varanya  OR  Ishwar Subhalaxmi">
-                        <button class="fetch-btn" onclick="fetchIKImages()">Fetch Images</button>
-                    </div>
-                    <div class="help-text">Type the exact ImageKit folder path and click "Fetch Images" to auto-load all
-                        photos.</div>
-                    <div class="ik-status" id="ikStatus"></div>
+                <div class="form-group full" style="margin-top:6px">
+                    <div class="section-divider">Photos</div>
                 </div>
                 <div class="form-group full">
-                    <label>Or Paste Image URLs (one per line)</label>
-                    <textarea id="fImgUrls" placeholder="https://ik.imagekit.io/shreebalaji/..." rows="4"></textarea>
-                    <div class="help-text">These will be combined with fetched images above.</div>
+                    <label>Upload Photos</label>
+                    <div class="upload-zone" id="uploadZone"
+                         ondragover="uzDragOver(event)" ondragleave="uzDragLeave(event)" ondrop="uzDrop(event)">
+                        <input type="file" id="fileInput" multiple accept="image/*" onchange="uzFilePicked(event)">
+                        <div class="uz-icon">📷</div>
+                        <div class="uz-text">Drag &amp; drop photos here</div>
+                        <div class="uz-sub">or click to select from your phone / computer</div>
+                    </div>
+                    <div class="upload-progress-list" id="uploadProgressList"></div>
                 </div>
                 <div class="form-group full">
                     <label>Image Preview</label>
@@ -915,6 +969,16 @@
                         <div style="color:var(--muted);font-size:.82rem;padding:4px 0">No images yet</div>
                     </div>
                 </div>
+                <details style="grid-column:1/-1;margin-top:4px">
+                    <summary style="font-size:.8rem;color:var(--muted);cursor:pointer;user-select:none">Advanced: load from ImageKit folder path</summary>
+                    <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">
+                        <div class="input-with-btn">
+                            <input type="text" id="fIKFolder" placeholder="e.g. new/godrej varanya  OR  Ishwar Subhalaxmi" style="flex:1;padding:10px 13px;background:var(--surface2);border:1px solid var(--border);border-radius:9px;color:var(--text);font-size:.9rem;font-family:inherit;outline:none">
+                            <button class="fetch-btn" onclick="fetchIKImages()">Fetch</button>
+                        </div>
+                        <div class="ik-status" id="ikStatus"></div>
+                    </div>
+                </details>
             </div>
             <div class="modal-footer">
                 <label
@@ -1105,7 +1169,7 @@ function openModal(id) {
   document.getElementById('fLocation').value = '';
   document.getElementById('fWA').value = '917767805544';
   document.getElementById('fIKFolder').value = '';
-  document.getElementById('fImgUrls').value = '';
+  document.getElementById('fImgUrls') && (document.getElementById('fImgUrls').value = '');
   document.getElementById('fActive').checked = true;
   document.getElementById('fType').value = 'residential';
   document.getElementById('fBadge').value = '';
@@ -1119,6 +1183,7 @@ function openModal(id) {
   document.getElementById('fFacing').value = '';
   document.getElementById('fParking').value = '';
   document.getElementById('ikStatus').textContent = '';
+  document.getElementById('uploadProgressList').innerHTML = '';
   renderTagList([]);
   renderImgPreview([]);
 
@@ -1199,6 +1264,67 @@ function handleTagKey(e) {
 
 function removeTag(i) { tagValues.splice(i, 1); renderTagList(tagValues); }
 
+// ── UPLOAD ZONE ──
+function uzDragOver(e)  { e.preventDefault(); document.getElementById('uploadZone').classList.add('dragover'); }
+function uzDragLeave()  { document.getElementById('uploadZone').classList.remove('dragover'); }
+function uzDrop(e)      { e.preventDefault(); uzDragLeave(); uploadFiles(e.dataTransfer.files); }
+function uzFilePicked(e){ uploadFiles(e.target.files); e.target.value=''; }
+
+async function uploadFiles(files) {
+    const list     = document.getElementById('uploadProgressList');
+    const propName = (document.getElementById('fName').value.trim() || 'property').replace(/[^a-z0-9]/gi, '_');
+    const folder   = '/website/' + propName;
+
+    for (const file of files) {
+        const itemId = 'up_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+        const item   = document.createElement('div');
+        item.className = 'upload-item';
+        item.id = itemId;
+        item.innerHTML = `
+            <span class="ui-name">${file.name}</span>
+            <div class="ui-bar-wrap"><div class="ui-bar" id="bar_${itemId}" style="width:0%"></div></div>
+            <span class="ui-status" id="st_${itemId}">Uploading…</span>`;
+        list.appendChild(item);
+
+        try {
+            const fd = new FormData();
+            fd.append('file', file);
+            fd.append('fileName', file.name);
+            fd.append('folder', folder);
+            fd.append('useUniqueFileName', 'true');
+
+            let pct = 0;
+            const ticker = setInterval(() => {
+                pct = Math.min(pct + 10, 85);
+                const b = document.getElementById('bar_' + itemId);
+                if (b) b.style.width = pct + '%';
+            }, 150);
+
+            const b64  = btoa(IK_PRIVATE + ':');
+            const resp = await fetch('https://upload.imagekit.io/api/v1/files/upload', {
+                method: 'POST',
+                headers: { Authorization: 'Basic ' + b64 },
+                body: fd
+            });
+            clearInterval(ticker);
+            const data = await resp.json();
+            if (!resp.ok || !data.url) throw new Error(data.message || 'Upload failed');
+
+            pendingImages.push(data.url + IK_TR);
+            renderImgPreview(pendingImages);
+            document.getElementById('bar_' + itemId).style.width = '100%';
+            item.classList.add('done');
+            document.getElementById('st_' + itemId).textContent = '✓ Done';
+
+        } catch(err) {
+            item.classList.add('error');
+            const b = document.getElementById('bar_' + itemId);
+            if (b) { b.style.width = '100%'; b.style.background = 'var(--danger)'; }
+            document.getElementById('st_' + itemId).textContent = '✗ Failed';
+        }
+    }
+}
+
 // ── IMAGEKIT FETCH ──
 async function fetchIKImages() {
   const folder = document.getElementById('fIKFolder').value.trim();
@@ -1244,10 +1370,8 @@ async function fetchIKImages() {
             const name = document.getElementById('fName').value.trim();
             if (!name) name = 'Untitled Property';
 
-            // Combine fetched + manually pasted URLs
-            const pasted = document.getElementById('fImgUrls').value
-                .split('\n').map(l => l.trim()).filter(Boolean);
-            const images = [...new Set([...pendingImages, ...pasted])];
+            // de-duplicate images
+            const images = [...new Set(pendingImages)];
 
             const payload = {
                 name,
