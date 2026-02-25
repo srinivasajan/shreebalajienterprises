@@ -195,6 +195,51 @@
             .pd-body { padding: 16px; }
             .pd-info-grid { grid-template-columns: 1fr 1fr; }
         }
+
+        /* ── Property Card Bottom Actions ── */
+        .card-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px solid #e5e7eb;
+        }
+        .card-btn-detail {
+            flex: 1;
+            padding: 10px 12px;
+            border: 1.5px solid #2563eb;
+            color: #2563eb;
+            background: transparent;
+            border-radius: 10px;
+            font-size: .86rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background .15s, color .15s;
+            white-space: nowrap;
+        }
+        .card-btn-detail:hover { background: #2563eb; color: #fff; }
+        .card-btn-wa {
+            flex: 1.6;
+            padding: 10px 12px;
+            background: #25d366;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: .86rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            text-decoration: none;
+            transition: background .15s;
+            white-space: nowrap;
+        }
+        .card-btn-wa:hover { background: #1ebe5b; color: #fff; }
+
+        /* ── Card feature tags wrap ── */
+        .property-card__features { flex-wrap: wrap !important; row-gap: 6px !important; }
     </style>
 </head>
 
@@ -417,11 +462,7 @@
 
 
 
-    <!-- Supabase Dynamic Properties -->
-
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-    <!-- Supabase Dynamic Properties -->
     <script>
     (function() {
         const SUPABASE_URL  = 'https://fzmdysptevsovhjcsddy.supabase.co';
@@ -478,11 +519,11 @@
                     <div class="property-card__type">${p.type || 'Residential'}</div>
                     <h3 class="property-card__title">${p.name}</h3>
                     <div class="property-card__location">${locSvg} ${p.location || 'Ambernath'}</div>
-                    ${priceOrRent ? `<div style="font-size:1rem;font-weight:700;color:#1d4ed8;margin:6px 0 4px">${priceOrRent}</div>` : ''}
+                    ${priceOrRent ? `<div style="font-size:1rem;font-weight:700;color:#1d4ed8;margin:4px 0 10px">${priceOrRent}</div>` : ''}
                     <div class="property-card__features">${previewFeatures}</div>
-                    <div style="margin-top:12px;display:flex;align-items:center;justify-content:space-between">
-                        <a href="https://wa.me/${p.whatsapp_number||'917767805544'}?text=${waText}" target="_blank" onclick="event.stopPropagation()" class="property-card__whatsapp">${waSvg} I am Interested</a>
-                        <span style="font-size:.8rem;color:#6b7280;text-decoration:underline">View Details ›</span>
+                    <div class="card-actions">
+                        <button class="card-btn-detail" onclick="event.stopPropagation();openPropModal('${id}')">View Details</button>
+                        <a href="https://wa.me/${p.whatsapp_number||'917767805544'}?text=${waText}" target="_blank" onclick="event.stopPropagation()" class="card-btn-wa">${waSvg} Interested</a>
                     </div>
                 </div>
             </div>`;
