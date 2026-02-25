@@ -5,40 +5,16 @@
 
 // ========================================
 // Page-as-Card Transition
-// On click: fetch next page → inject behind current → slide current away to reveal it.
-// No blank screen — real destination content is underneath.
+// Chrome 111+: native View Transitions via meta tag + @view-transition CSS.
+// Firefox/Safari: sessionStorage + body class fallback.
+// Zero DOM manipulation.
 // ========================================
 (function () {
-    var NAV_KEY  = 'sbe-card-nav';   // deal-in on next load
-    var SKIP_KEY = 'sbe-card-skip';  // skip enter anim (content already shown)
+    var KEY = 'sbe-card-nav';
+    // If browser handles it natively, do nothing
+    if (typeof document.startViewTransition === 'function') return;
 
-    // Wrap all body children in #page-wrap (script runs at end of body)
-    function wrapPage() {
-        if (document.getElementById('page-wrap')) return;
-        var wrap = document.createElement('div');
-        wrap.id = 'page-wrap';
-        while (document.body.firstChild) {
-            wrap.appendChild(document.body.firstChild);
-        }
-        document.body.appendChild(wrap);
-    }
-    wrapPage();
-
-    // Handle enter animation on the new page
-    if (sessionStorage.getItem(SKIP_KEY)) {
-        // Content was already previewed underneath — just finish loading, no animation
-        sessionStorage.removeItem(SKIP_KEY);
-    } else if (sessionStorage.getItem(NAV_KEY)) {
-        // Normal fallback deal-in (fetch failed or slow)
-        sessionStorage.removeItem(NAV_KEY);
-        var w = document.getElementById('page-wrap');
-        if (w) {
-            w.classList.add('vt-enter');
-            setTimeout(function () { w.classList.remove('vt-enter'); }, 700);
-        }
-    }
-
-    // Intercept internal link clicks
+    // Fallback for Firefox / Safari
     document.addEventListener('click', function (e) {
         var a = e.target.closest('a[href]');
         if (!a) return;
@@ -46,37 +22,18 @@
         if (a.target === '_blank' || /^(mailto:|tel:|#|javascript)/.test(raw)) return;
         if (a.hostname && a.hostname !== location.hostname) return;
         e.preventDefault();
+        document.body.classList.add('vt-exit');
+        sessionStorage.setItem(KEY, '1');
         var dest = a.href;
-        var wrap = document.getElementById('page-wrap');
-
-        // Create the next-card layer immediately (placeholder while fetching)
-        var nextCard = document.createElement('div');
-        nextCard.id = 'next-card';
-        document.body.insertBefore(nextCard, document.body.firstChild);
-
-        // Fetch the destination page and fill the next-card with its content
-        fetch(dest, { credentials: 'same-origin' })
-            .then(function (r) { return r.text(); })
-            .then(function (html) {
-                var parser = new DOMParser();
-                var doc    = parser.parseFromString(html, 'text/html');
-                // Use its #page-wrap content if it exists, else full body
-                var src = doc.getElementById('page-wrap') || doc.body;
-                nextCard.innerHTML = src.innerHTML;
-                sessionStorage.setItem(SKIP_KEY, '1'); // no enter anim needed
-            })
-            .catch(function () {
-                // Fetch failed — fall back to deal-in animation on next load
-                sessionStorage.setItem(NAV_KEY, '1');
-            });
-
-        // Start slide-off immediately regardless of fetch timing
-        document.body.classList.add('vt-exiting');
-        if (wrap) wrap.classList.add('vt-exit');
-
-        // Navigate after animation completes
-        setTimeout(function () { location.href = dest; }, 780);
+        setTimeout(function () { location.href = dest; }, 580);
     }, true);
+
+    document.addEventListener('DOMContentLoaded', function () {
+        if (!sessionStorage.getItem(KEY)) return;
+        sessionStorage.removeItem(KEY);
+        document.body.classList.add('vt-enter');
+        setTimeout(function () { document.body.classList.remove('vt-enter'); }, 600);
+    });
 })();
 
 document.addEventListener('DOMContentLoaded', function () {
