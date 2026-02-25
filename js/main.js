@@ -63,7 +63,6 @@
                 // Use its #page-wrap content if it exists, else full body
                 var src = doc.getElementById('page-wrap') || doc.body;
                 nextCard.innerHTML = src.innerHTML;
-                nextCard.classList.add('ready'); // straighten the slight tilt
                 sessionStorage.setItem(SKIP_KEY, '1'); // no enter anim needed
             })
             .catch(function () {

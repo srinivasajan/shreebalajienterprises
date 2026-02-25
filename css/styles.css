@@ -1617,7 +1617,7 @@ html { background: #001f40; }
     overflow-x: clip;
 }
 
-/* Next page content sits fixed behind the current card */
+/* Next page content — hidden until exit animation starts */
 #next-card {
     position: fixed;
     inset: 0;
@@ -1625,20 +1625,17 @@ html { background: #001f40; }
     background: var(--white);
     overflow: hidden;
     pointer-events: none;
-    /* Slight right-tilt at rest, like the card waiting in the deck */
-    transform: rotate(2deg) translate(8px, 4px);
-    transform-origin: 50% 100%;
-    transition: transform 0.3s cubic-bezier(.16,1,.3,1);
-    border-radius: 2px;
-}
-/* Once content is loaded, straighten the card */
-#next-card.ready {
-    transform: none;
+    /* Invisible by default — only revealed when #page-wrap slides off */
+    opacity: 0;
+    transition: opacity 0s;
 }
 
-/* During exit: body background transparent so #next-card shows through */
+/* During exit: make body transparent AND reveal #next-card */
 body.vt-exiting {
     background: transparent !important;
+}
+body.vt-exiting #next-card {
+    opacity: 1;
 }
 
 @keyframes card-deal-out {
